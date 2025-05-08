@@ -15,9 +15,6 @@ import {
   BriefcaseBusiness,
   ChevronDown,
   ChevronRight,
-  LogOut,
-  Palette,
-  User,
 } from "lucide-react"
 import { useState } from "react"
 import LogoutModal from "./logout-modal"
@@ -27,7 +24,6 @@ export default function Sidebar() {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     blog: false, // Blog menüsü varsayılan olarak kapalı
   })
-  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const toggleMenu = (menu: string) => {
     setOpenMenus((prev) => ({
@@ -177,16 +173,6 @@ export default function Sidebar() {
         </Link>
 
         <Link
-          href="/admin/profile"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/profile") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <User className="h-5 w-5" />
-          <span>Profil</span>
-        </Link>
-
-        <Link
           href="/admin/reports"
           className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
             isActive("/admin/reports") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
@@ -219,18 +205,6 @@ export default function Sidebar() {
         </Link>
 
         <Link
-          href="/admin/site-settings"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/site-settings")
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Palette className="h-5 w-5" />
-          <span>Site Ayarları</span>
-        </Link>
-
-        <Link
           href="/admin/settings"
           className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
             isActive("/admin/settings") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
@@ -243,17 +217,8 @@ export default function Sidebar() {
 
       {/* Çıkış Yap Butonu - Sidebar'ın alt kısmında */}
       <div className="mt-auto px-2 pt-4 border-t border-gray-200">
-        <button
-          onClick={() => setShowLogoutModal(true)}
-          className="flex items-center space-x-2 w-full px-3 py-2 rounded-md transition-colors text-red-600 hover:bg-red-50"
-        >
-          <LogOut className="h-5 w-5" />
-          <span>Çıkış Yap</span>
-        </button>
+        <LogoutModal />
       </div>
-
-      {/* Çıkış Yap Modal */}
-      {showLogoutModal && <LogoutModal open={showLogoutModal} onOpenChange={setShowLogoutModal} />}
     </div>
   )
 }

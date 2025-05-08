@@ -13,6 +13,7 @@ export function getSupabaseClient() {
   return supabaseClient
 }
 
+// Geriye dönük uyumluluk için eski fonksiyon adını da koruyalım
 export const createClientSupabaseClient = getSupabaseClient
 
 export async function checkAdminStatus() {

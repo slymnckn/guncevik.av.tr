@@ -54,14 +54,7 @@ export async function createUser(formData: FormData) {
     const name = formData.get("name") as string
     const role = formData.get("role") as string
 
-    console.log("Kullanıcı oluşturma verileri:", { email, name, role, passwordLength: password?.length })
-
-    if (!email || !password || !name || !role) {
-      console.error("Eksik veri:", { email: !!email, password: !!password, name: !!name, role: !!role })
-      return { error: "Tüm alanları doldurun." }
-    }
-
-    // 1. Önce auth kullanıcısı oluştur
+    // Kullanıcı oluştur
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -70,18 +63,11 @@ export async function createUser(formData: FormData) {
 
     if (authError) {
       console.error("Kullanıcı oluşturulurken hata:", authError)
-      return { error: `Kullanıcı oluşturulurken hata: ${authError.message}` }
+      return { error: "Kullanıcı oluşturulurken bir hata oluştu." }
     }
 
-    if (!authData || !authData.user || !authData.user.id) {
-      console.error("Auth verisi oluşturulamadı:", authData)
-      return { error: "Kullanıcı kimliği oluşturulamadı." }
-    }
-
-    console.log("Auth kullanıcısı oluşturuldu:", authData.user.id)
-
-    // 2. Service role ile profil oluştur (RLS bypass)
-    const { data: profileData, error: profileError } = await supabase.from("admin_profiles").insert({
+    // Profil oluştur
+    const { error: profileError } = await supabase.from("admin_profiles").insert({
       id: authData.user.id,
       email,
       name,
@@ -90,25 +76,14 @@ export async function createUser(formData: FormData) {
 
     if (profileError) {
       console.error("Profil oluşturulurken hata:", profileError)
-
-      // Hata durumunda oluşturulan auth kullanıcısını sil
-      try {
-        await supabase.auth.admin.deleteUser(authData.user.id)
-        console.log("Hata nedeniyle auth kullanıcısı silindi:", authData.user.id)
-      } catch (deleteError) {
-        console.error("Auth kullanıcısı silinirken hata:", deleteError)
-      }
-
-      return { error: `Kullanıcı profili oluşturulurken hata: ${profileError.message}` }
+      return { error: "Kullanıcı profili oluşturulurken bir hata oluştu." }
     }
-
-    console.log("Profil oluşturuldu:", profileData)
 
     revalidatePath("/admin/users")
     return { success: true }
   } catch (error) {
-    console.error("Kullanıcı oluşturulurken beklenmeyen hata:", error)
-    return { error: `Kullanıcı oluşturulurken beklenmeyen hata: ${(error as Error).message}` }
+    console.error("Kullanıcı oluşturulurken hata:", error)
+    return { error: "Kullanıcı oluşturulurken bir hata oluştu." }
   }
 }
 
@@ -121,50 +96,40 @@ export async function updateUser(userId: string, formData: FormData) {
     const role = formData.get("role") as string
     const password = formData.get("password") as string
 
-    console.log("Kullanıcı güncelleme verileri:", { userId, email, name, role, hasPassword: !!password })
-
-    if (!userId || !email || !name || !role) {
-      console.error("Eksik veri:", { userId: !!userId, email: !!email, name: !!name, role: !!role })
-      return { error: "Tüm alanları doldurun." }
-    }
-
-    // 1. Şifre değişikliği varsa auth kullanıcısını güncelle
-    if (password && password.trim() !== "") {
+    // Kullanıcı güncelle
+    if (password) {
       const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
         password,
         email,
       })
 
       if (authError) {
-        console.error("Kullanıcı kimlik bilgileri güncellenirken hata:", authError)
-        return { error: `Kullanıcı kimlik bilgileri güncellenirken hata: ${authError.message}` }
+        console.error("Kullanıcı güncellenirken hata:", authError)
+        return { error: "Kullanıcı güncellenirken bir hata oluştu." }
       }
-
-      console.log("Kullanıcı kimlik bilgileri güncellendi")
     }
 
-    // 2. Service role ile profili güncelle (RLS bypass)
+    // Profil güncelle
     const { error: profileError } = await supabase
       .from("admin_profiles")
       .update({
         name,
         role,
         email,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", userId)
 
     if (profileError) {
       console.error("Profil güncellenirken hata:", profileError)
-      return { error: `Kullanıcı profili güncellenirken hata: ${profileError.message}` }
+      return { error: "Kullanıcı profili güncellenirken bir hata oluştu." }
     }
-
-    console.log("Profil güncellendi")
 
     revalidatePath("/admin/users")
     return { success: true }
   } catch (error) {
-    console.error("Kullanıcı güncellenirken beklenmeyen hata:", error)
-    return { error: `Kullanıcı güncellenirken beklenmeyen hata: ${(error as Error).message}` }
+    console.error("Kullanıcı güncellenirken hata:", error)
+    return { error: "Kullanıcı güncellenirken bir hata oluştu." }
   }
 }
 
@@ -172,26 +137,18 @@ export async function deleteUser(userId: string) {
   try {
     const supabase = createAdminSupabaseClient()
 
-    if (!userId) {
-      return { error: "Kullanıcı ID'si gerekli." }
-    }
-
-    console.log("Kullanıcı siliniyor:", userId)
-
-    // Kullanıcıyı sil (cascade ile profil de silinecek)
+    // Kullanıcıyı sil
     const { error: authError } = await supabase.auth.admin.deleteUser(userId)
 
     if (authError) {
       console.error("Kullanıcı silinirken hata:", authError)
-      return { error: `Kullanıcı silinirken hata: ${authError.message}` }
+      return { error: "Kullanıcı silinirken bir hata oluştu." }
     }
-
-    console.log("Kullanıcı başarıyla silindi")
 
     revalidatePath("/admin/users")
     return { success: true }
   } catch (error) {
-    console.error("Kullanıcı silinirken beklenmeyen hata:", error)
-    return { error: `Kullanıcı silinirken beklenmeyen hata: ${(error as Error).message}` }
+    console.error("Kullanıcı silinirken hata:", error)
+    return { error: "Kullanıcı silinirken bir hata oluştu." }
   }
 }

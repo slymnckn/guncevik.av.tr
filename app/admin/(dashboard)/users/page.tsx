@@ -3,16 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
-import { getUsers } from "@/actions/user-actions"
 import UsersClientPage from "./UsersClientPage"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-export default async function UsersPage() {
-  const { users, error } = (await getUsers()) || { users: [], error: null }
-
+export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -35,7 +32,7 @@ export default async function UsersPage() {
         </CardHeader>
         <CardContent>
           <Suspense fallback={<UsersTableSkeleton />}>
-            <UsersClientPage users={users} />
+            <UsersClientPage />
           </Suspense>
         </CardContent>
       </Card>

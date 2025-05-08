@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Sadece güvenlik başlıklarını ekle, auth kontrolü yapma
   const res = NextResponse.next()
 

@@ -1,41 +1,49 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient as supabaseCreateClient } from "@supabase/supabase-js"
 import type { Database } from "../types/database"
 
-export function createServerSupabaseClient() {
-  const cookieStore = cookies()
+// Singleton pattern - tek bir admin Supabase istemcisi oluştur
+let adminSupabaseClient: ReturnType<typeof supabaseCreateClient<Database>> | null = null
 
-  return createServerClient<Database>(
+export const createAdminSupabaseClient = () => {
+  if (adminSupabaseClient) return adminSupabaseClient
+
+  adminSupabaseClient = supabaseCreateClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          try {
-            cookieStore.set({ name, value, ...options })
-          } catch (error) {
-            // Çerez ayarlanırken hata oluştu, muhtemelen SSG sırasında
-            console.error("Çerez ayarlanırken hata:", error)
-          }
-        },
-        remove(name: string, options: any) {
-          try {
-            cookieStore.set({ name, value: "", ...options })
-          } catch (error) {
-            // Çerez kaldırılırken hata oluştu, muhtemelen SSG sırasında
-            console.error("Çerez kaldırılırken hata:", error)
-          }
-        },
+      auth: {
+        persistSession: false,
       },
     },
   )
+
+  return adminSupabaseClient
 }
 
-export function createAdminSupabaseClient() {
-  return createServerSupabaseClient()
+// Geriye dönük uyumluluk için createServerSupabaseClient alias'ı
+export const createServerSupabaseClient = createAdminSupabaseClient
+
+// Geriye dönük uyumluluk için createClient export'u
+export const createClient = createAdminSupabaseClient
+
+// Orijinal createClient fonksiyonunu da export edelim
+
+// Admin profil kontrolü
+export async function getAdminProfile(userId: string) {
+  const supabase = createAdminSupabaseClient()
+
+  const { data, error } = await supabase.from("admin_profiles").select("*").eq("id", userId).single()
+
+  if (error) {
+    console.error("Admin profili bulunamadı:", error)
+    return null
+  }
+
+  return data
 }
 
-export const createClient = createServerSupabaseClient
+// Admin kontrolü
+export async function isUserAdmin(userId: string) {
+  const profile = await getAdminProfile(userId)
+  return profile?.role === "admin"
+}
