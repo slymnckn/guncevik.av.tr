@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getSupabaseClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,19 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = getSupabaseClient()
+
+  // Oturum kontrolü
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      if (data.session) {
+        // Kullanıcı zaten giriş yapmış, dashboard'a yönlendir
+        router.push("/admin/dashboard")
+      }
+    }
+
+    checkSession()
+  }, [router, supabase.auth])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,7 +62,9 @@ export default function LoginPage() {
       }
 
       console.log("Admin girişi başarılı, yönlendiriliyor...")
-      router.push("/admin/dashboard")
+
+      // Yönlendirme işlemi
+      window.location.href = "/admin/dashboard"
     } catch (error: any) {
       console.error("Giriş hatası:", error.message)
       setError(error.message || "Giriş yapılırken bir hata oluştu")
