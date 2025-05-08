@@ -62,11 +62,8 @@ export default function DashboardPage() {
             .from("blog_posts")
             .select("*", { count: "exact", head: true })
 
-          // Toplam aktif hizmet sayısı
-          const { count: totalServices } = await supabase
-            .from("services")
-            .select("*", { count: "exact", head: true })
-            .eq("active", true)
+          // Toplam hizmet sayısı - active filtresi olmadan tüm hizmetleri sayalım
+          const { count: totalServices } = await supabase.from("services").select("*", { count: "exact", head: true })
 
           // Son 7 gündeki yeni iletişim mesajları
           const sevenDaysAgo = new Date()
@@ -214,12 +211,12 @@ export default function DashboardPage() {
         </Card>
         <Card className={isLoading ? "opacity-60" : ""}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktif Hizmetler</CardTitle>
+            <CardTitle className="text-sm font-medium">Hizmetler</CardTitle>
             <BriefcaseBusiness className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalServices}</div>
-            <p className="text-xs text-muted-foreground">Aktif hizmet sayısı</p>
+            <p className="text-xs text-muted-foreground">Toplam hizmet sayısı</p>
           </CardContent>
         </Card>
       </div>
