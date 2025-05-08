@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { createAdminSupabaseClient } from "@/lib/supabase/admin"
 import { slugify } from "@/lib/utils"
 import type { BlogPost } from "@/lib/types/admin"
+import { createClient } from "@/lib/supabase/server"
 
 // Bucket adı - Supabase'de oluşturduğunuz bucket adı
 const BUCKET_NAME = "blog-images"
@@ -245,48 +246,43 @@ export async function updateBlogPost(id: string, formData: FormData) {
   }
 }
 
-// Blog yazısı silme
+/**
+ * Blog yazısını siler
+ */
 export async function deleteBlogPost(id: string) {
   try {
-    const supabase = createServerSupabaseClient()
-    // Admin client'ı oluştur (servis rolü ile)
-    const adminClient = createAdminSupabaseClient()
+    const supabase = createClient()
 
-    // Önce blog yazısını al
-    const { data: post, error: fetchError } = await supabase
-      .from("blog_posts")
-      .select("image_path")
-      .eq("id", id)
-      .single()
+    // Önce blog_post_tags tablosundan ilişkili kayıtları silelim
+    const { error: tagsError } = await supabase.from("blog_post_tags").delete().eq("post_id", id)
 
-    if (fetchError) {
-      throw new Error(`Blog yazısı bulunamadı: ${fetchError.message}`)
+    if (tagsError) {
+      console.error("Blog etiketleri silinirken hata oluştu:", tagsError.message)
+      return { success: false, error: tagsError.message }
     }
 
-    // Eğer resim varsa, resmi sil
-    if (post.image_path) {
-      try {
-        // Admin client ile resmi sil (RLS bypass)
-        await adminClient.storage.from(BUCKET_NAME).remove([post.image_path])
-      } catch (error) {
-        console.error("Resim silinirken hata:", error)
-      }
+    // Sonra blog_comments tablosundan ilişkili yorumları silelim
+    const { error: commentsError } = await supabase.from("blog_comments").delete().eq("post_id", id)
+
+    if (commentsError) {
+      console.error("Blog yorumları silinirken hata oluştu:", commentsError.message)
+      return { success: false, error: commentsError.message }
     }
 
-    // Blog yazısını sil
+    // Son olarak blog yazısını silelim
     const { error } = await supabase.from("blog_posts").delete().eq("id", id)
 
     if (error) {
-      throw new Error(`Blog yazısı silinirken hata oluştu: ${error.message}`)
+      console.error("Blog yazısı silinirken hata oluştu:", error.message)
+      return { success: false, error: error.message }
     }
 
+    // Cache'i temizleyelim ve admin blog sayfasına yönlendirelim
     revalidatePath("/admin/blog")
-    revalidatePath("/makaleler")
-
     return { success: true }
-  } catch (error: any) {
-    console.error("Blog yazısı silinirken hata:", error)
-    return { success: false, message: error.message }
+  } catch (error) {
+    console.error("Blog yazısı silinirken bir hata oluştu:", error)
+    return { success: false, error: "Blog yazısı silinirken bir hata oluştu" }
   }
 }
 

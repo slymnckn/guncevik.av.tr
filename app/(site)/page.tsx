@@ -1,13 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { TestimonialCard } from "@/components/testimonial-card"
 import { SectionHeader } from "@/components/section-header"
 import { CTASection } from "@/components/cta-section"
 import { ArrowRight } from "lucide-react"
 import { LawFirmSchema } from "@/components/seo/law-firm-schema"
 import { getServices } from "@/actions/service-actions"
-import { getIconComponent } from "@/lib/utils/icon-helper" // İkon yardımcısını ekleyelim
+import { getIconComponent } from "@/lib/utils/icon-helper"
 
 export const metadata = {
   title: "GÜN ÇEVİK Hukuk Bürosu | İzmir'de Uzman Avukatlık Hizmetleri",
@@ -24,46 +23,13 @@ export default async function Home() {
 
   try {
     services = await getServices()
-    // Öne çıkan hizmetleri filtrele ve en fazla 3 tane göster
-    featuredServices = services.filter((service) => service.is_featured).slice(0, 3)
+    // Öne çıkan hizmetleri filtrele ve en fazla 6 tane göster
+    featuredServices = services.filter((service) => service.is_featured).slice(0, 6)
   } catch (error) {
     console.error("Hizmetler yüklenirken hata oluştu:", error)
     // Hata durumunda boş array kullan
     services = []
     featuredServices = []
-  }
-
-  // Varsayılan hizmetler
-  const defaultServices = [
-    {
-      id: 1,
-      title: "Ticaret Hukuku",
-      description:
-        "Şirket kuruluşları, birleşme ve devralmalar, ticari sözleşmeler ve uyuşmazlık çözümleri konularında uzman danışmanlık.",
-      icon: "briefcase",
-      slug: "ticaret-hukuku",
-    },
-    {
-      id: 2,
-      title: "Sigorta Hukuku",
-      description:
-        "Trafik kazaları, iş kazaları, mal ve can kayıpları, sağlık sigortası anlaşmazlıkları konularında hukuki destek.",
-      icon: "shield",
-      slug: "sigorta-hukuku",
-    },
-    {
-      id: 3,
-      title: "İş Hukuku",
-      description:
-        "İşçi-işveren ilişkileri, iş sözleşmeleri, işe iade davaları, tazminat talepleri konularında hukuki danışmanlık.",
-      icon: "users",
-      slug: "is-hukuku",
-    },
-  ]
-
-  // Eğer featuredServices boşsa, varsayılan hizmetleri kullan
-  if (featuredServices.length === 0) {
-    featuredServices = defaultServices
   }
 
   return (
@@ -147,24 +113,31 @@ export default async function Home() {
           subtitle="Geniş bir yelpazede hukuki hizmetler sunuyoruz. İhtiyacınıza uygun çözümler için yanınızdayız."
         />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredServices.map((service) => (
-            <div
-              key={service.id}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg"
-            >
-              <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                {/* İkon gösterimini getIconComponent ile değiştirelim */}
-                {getIconComponent(service.icon || "briefcase")}
+          {featuredServices.length > 0 ? (
+            featuredServices.map((service) => (
+              <div
+                key={service.id}
+                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg"
+              >
+                <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+                  {getIconComponent(service.icon || "briefcase")}
+                </div>
+                <h3 className="text-xl font-bold mb-3">{service.title}</h3>
+                <p className="mb-4 text-gray-600 dark:text-gray-300">{service.description}</p>
+                <Button asChild variant="link" className="p-0">
+                  <Link href={`/hizmetlerimiz/${service.slug}`} className="flex items-center">
+                    Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
-              <h3 className="text-xl font-bold mb-3">{service.title}</h3>
-              <p className="mb-4 text-gray-600 dark:text-gray-300">{service.description}</p>
-              <Button asChild variant="link" className="p-0">
-                <Link href={`/hizmetlerimiz/${service.slug}`} className="flex items-center">
-                  Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-500">
+                Hizmet bilgileri yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.
+              </p>
             </div>
-          ))}
+          )}
         </div>
         <div className="text-center mt-8">
           <Button asChild className="bg-primary hover:bg-primary/90">
@@ -261,44 +234,6 @@ export default async function Home() {
               </Button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-12">
-        <SectionHeader
-          title="Müvekkil Yorumları"
-          subtitle="Müvekkillerimizin memnuniyeti bizim için en büyük başarıdır."
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <TestimonialCard
-            name="Ahmet Yılmaz"
-            role="İşletme Sahibi"
-            image="/diverse-group-city.png"
-            rating={5}
-            testimonial="Ticari anlaşmazlığımızda gösterdiğiniz profesyonel yaklaşım ve çözüm odaklı stratejiniz sayesinde davamızı kazandık. Teşekkür ederiz."
-          />
-          <TestimonialCard
-            name="Ayşe Kaya"
-            role="Yönetici"
-            image="/contemplative-artist.png"
-            rating={5}
-            testimonial="İş hukuku konusundaki uzmanlığınız ve detaylı analizleriniz sayesinde şirketimiz için en doğru kararları alabildik."
-          />
-          <TestimonialCard
-            name="Mehmet Demir"
-            role="Sigorta Danışmanı"
-            image="/contemplative-man.png"
-            rating={4}
-            testimonial="Sigorta tazminat talebimizde gösterdiğiniz titiz çalışma ve hızlı iletişim için teşekkür ederim. Sonuçtan çok memnunum."
-          />
-        </div>
-        <div className="text-center mt-8">
-          <Button asChild variant="outline">
-            <Link href="/referanslar" className="flex items-center justify-center">
-              Tüm Referanslarımız <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </section>
 

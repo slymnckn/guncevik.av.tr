@@ -63,7 +63,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-16">
         <div className="p-8">
           <div className="flex items-center mb-6">
-            <div className="text-primary mr-4">{getIconComponent(service.icon || "Briefcase")}</div>
+            <div className="text-primary mr-4">{getIconComponent(service.icon || "briefcase")}</div>
             <h1 className="text-3xl font-bold">{service.title}</h1>
           </div>
 
@@ -93,7 +93,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {otherServices.map((otherService) => (
               <div key={otherService.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <div className="text-primary mb-4">{getIconComponent(otherService.icon)}</div>
+                <div className="text-primary mb-4">{getIconComponent(otherService.icon || "briefcase")}</div>
                 <h3 className="font-bold text-lg mb-2">{otherService.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">{otherService.description}</p>
                 <Link

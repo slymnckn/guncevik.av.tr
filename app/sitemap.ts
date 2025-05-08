@@ -6,6 +6,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerComponentClient({ cookies })
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
 
+  // Sitemap.ts dosyasındaki staticPages dizisinden referanslar sayfasını kaldıralım
+
   // Statik sayfalar
   const staticPages = [
     {
@@ -56,12 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.6,
     },
-    {
-      url: `${baseUrl}/referanslar`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
+    // Referanslar sayfası kaldırıldı
   ]
 
   // Blog yazılarını getir

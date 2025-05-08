@@ -81,32 +81,41 @@ export function Footer() {
             <h3 className="text-lg font-bold mb-4 border-b border-gray-700 pb-2">Hizmetlerimiz</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/hizmetlerimiz#ticaret" className="text-gray-300 hover:text-white transition-colors">
+                <Link
+                  href="/hizmetlerimiz/ticaret-ve-sirketler-hukuku"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
                   Ticaret Hukuku
                 </Link>
               </li>
               <li>
-                <Link href="/hizmetlerimiz#sigorta" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/hizmetlerimiz/sigorta-hukuku" className="text-gray-300 hover:text-white transition-colors">
                   Sigorta Hukuku
                 </Link>
               </li>
               <li>
-                <Link href="/hizmetlerimiz#is" className="text-gray-300 hover:text-white transition-colors">
+                <Link
+                  href="/hizmetlerimiz/is-ve-sosyal-guvenlik-hukuku"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
                   İş Hukuku
                 </Link>
               </li>
               <li>
-                <Link href="/hizmetlerimiz#ceza" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/hizmetlerimiz/ceza-hukuku" className="text-gray-300 hover:text-white transition-colors">
                   Ceza Hukuku
                 </Link>
               </li>
               <li>
-                <Link href="/hizmetlerimiz#aile" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/hizmetlerimiz/aile-hukuku" className="text-gray-300 hover:text-white transition-colors">
                   Aile Hukuku
                 </Link>
               </li>
               <li>
-                <Link href="/hizmetlerimiz#gayrimenkul" className="text-gray-300 hover:text-white transition-colors">
+                <Link
+                  href="/hizmetlerimiz/gayrimenkul-ve-insaat-hukuku"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
                   Gayrimenkul Hukuku
                 </Link>
               </li>
