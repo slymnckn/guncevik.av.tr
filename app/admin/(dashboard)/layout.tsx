@@ -97,6 +97,13 @@ export default function AdminDashboardLayout({
     }
   }
 
+  // Mobil cihazlarda sayfa değiştiğinde sidebar'ı kapat
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false)
+    }
+  }, [pathname, isMobile])
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -106,44 +113,50 @@ export default function AdminDashboardLayout({
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Mobil menü butonu */}
-      <div className="lg:hidden flex items-center p-4 border-b bg-white">
+      <div className="lg:hidden sticky top-0 z-40 flex items-center p-4 border-b bg-white shadow-sm">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label={sidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
+          className="mr-2"
         >
           <Menu className="h-6 w-6" />
         </Button>
-        <div className="ml-4 font-semibold">Admin Panel</div>
+        <div className="font-semibold">Admin Panel</div>
       </div>
 
-      {/* Sidebar */}
-      <div
-        className={`
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-          lg:translate-x-0
-          fixed lg:sticky top-0 left-0 z-40 h-screen w-64 
-          transition-transform duration-300 ease-in-out
-          bg-white border-r border-gray-200 overflow-y-auto
-        `}
-      >
-        <Sidebar onLinkClick={closeSidebar} />
-      </div>
-
-      {/* Overlay - Mobil görünümde sidebar açıkken arka planı karartır */}
-      {sidebarOpen && isMobile && (
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={closeSidebar}
-          aria-hidden="true"
-        />
-      )}
+          className={`
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+            lg:translate-x-0
+            fixed lg:relative top-0 left-0 z-40 h-full w-[280px] 
+            transition-transform duration-300 ease-in-out
+            bg-white border-r border-gray-200 overflow-y-auto
+            lg:block
+          `}
+        >
+          <Sidebar onLinkClick={closeSidebar} />
+        </div>
 
-      {/* Ana içerik */}
-      <div className={`flex-1 p-4 lg:p-6 ${sidebarOpen && isMobile ? "blur-sm" : ""} lg:ml-0`}>{children}</div>
+        {/* Overlay - Mobil görünümde sidebar açıkken arka planı karartır */}
+        {sidebarOpen && isMobile && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+            onClick={closeSidebar}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Ana içerik */}
+        <main className="flex-1 overflow-auto p-4 lg:p-6">
+          <div className="container mx-auto max-w-7xl">{children}</div>
+        </main>
+      </div>
     </div>
   )
 }

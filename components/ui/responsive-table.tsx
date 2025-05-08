@@ -6,6 +6,7 @@ interface Column {
   accessor: string
   cell?: (value: any, row: any) => React.ReactNode
   className?: string
+  hideOnMobile?: boolean
 }
 
 interface ResponsiveTableProps {
@@ -23,6 +24,9 @@ export function ResponsiveTable({ columns, data, className, emptyMessage = "Veri
       </div>
     )
   }
+
+  // Mobil görünümde gösterilecek sütunları filtrele
+  const mobileColumns = columns.filter((col) => !col.hideOnMobile)
 
   return (
     <div className={cn("overflow-hidden rounded-lg shadow-md", className)}>
@@ -68,7 +72,7 @@ export function ResponsiveTable({ columns, data, className, emptyMessage = "Veri
             key={rowIndex}
             className="bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 last:border-0"
           >
-            {columns.map((column, colIndex) => (
+            {mobileColumns.map((column, colIndex) => (
               <div key={colIndex} className="py-2">
                 <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{column.header}</div>
                 <div className={cn("mt-1 text-sm text-gray-900 dark:text-white", column.className)}>

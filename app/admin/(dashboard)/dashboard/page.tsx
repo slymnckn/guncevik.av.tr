@@ -173,12 +173,12 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Hoş geldiniz! İşte site istatistikleriniz.</p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className={isLoading ? "opacity-60" : ""}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Toplam Mesajlar</CardTitle>
@@ -221,15 +221,16 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Diğer içerikler aynı kalacak */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Son İletişim Mesajları */}
         <Card className={isLoading ? "opacity-60" : ""}>
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Son İletişim Mesajları</CardTitle>
               <Link href="/admin/messages" className="text-primary hover:text-primary/80 text-sm flex items-center">
-                Tümünü Görüntüle <ArrowRight className="ml-1 h-4 w-4" />
+                <span className="hidden sm:inline">Tümünü Görüntüle</span>
+                <span className="sm:hidden">Tümü</span>
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
           </CardHeader>
@@ -274,7 +275,9 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center">
               <CardTitle>Son Randevular</CardTitle>
               <Link href="/admin/appointments" className="text-primary hover:text-primary/80 text-sm flex items-center">
-                Tümünü Görüntüle <ArrowRight className="ml-1 h-4 w-4" />
+                <span className="hidden sm:inline">Tümünü Görüntüle</span>
+                <span className="sm:hidden">Tümü</span>
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
           </CardHeader>
@@ -314,14 +317,16 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Son Blog Yazıları */}
         <Card className={isLoading ? "opacity-60" : ""}>
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Son Blog Yazıları</CardTitle>
               <Link href="/admin/blog" className="text-primary hover:text-primary/80 text-sm flex items-center">
-                Tümünü Görüntüle <ArrowRight className="ml-1 h-4 w-4" />
+                <span className="hidden sm:inline">Tümünü Görüntüle</span>
+                <span className="sm:hidden">Tümü</span>
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
           </CardHeader>
@@ -332,7 +337,7 @@ export default function DashboardPage() {
                   {recentBlogPosts.map((post) => (
                     <div key={post.id} className="py-3">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-medium text-gray-900">{post.title}</h3>
+                        <h3 className="font-medium text-gray-900 line-clamp-1">{post.title}</h3>
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${post.published ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}
                         >
@@ -371,18 +376,30 @@ export default function DashboardPage() {
             <CardTitle>Hızlı İşlemler</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" asChild>
-                <Link href="/admin/blog/new">Yeni Blog Yazısı</Link>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button variant="outline" asChild className="h-auto py-3">
+                <Link href="/admin/blog/new" className="flex flex-col items-center justify-center">
+                  <FileText className="h-5 w-5 mb-1" />
+                  <span>Yeni Blog Yazısı</span>
+                </Link>
               </Button>
-              <Button variant="outline" asChild>
-                <Link href="/admin/services/new">Yeni Hizmet</Link>
+              <Button variant="outline" asChild className="h-auto py-3">
+                <Link href="/admin/services/new" className="flex flex-col items-center justify-center">
+                  <BriefcaseBusiness className="h-5 w-5 mb-1" />
+                  <span>Yeni Hizmet</span>
+                </Link>
               </Button>
-              <Button variant="outline" asChild>
-                <Link href="/admin/blog/categories/new">Yeni Kategori</Link>
+              <Button variant="outline" asChild className="h-auto py-3">
+                <Link href="/admin/blog/categories/new" className="flex flex-col items-center justify-center">
+                  <FileText className="h-5 w-5 mb-1" />
+                  <span>Yeni Kategori</span>
+                </Link>
               </Button>
-              <Button variant="outline" asChild>
-                <Link href="/admin/blog/tags/new">Yeni Etiket</Link>
+              <Button variant="outline" asChild className="h-auto py-3">
+                <Link href="/admin/blog/tags/new" className="flex flex-col items-center justify-center">
+                  <FileText className="h-5 w-5 mb-1" />
+                  <span>Yeni Etiket</span>
+                </Link>
               </Button>
             </div>
           </CardContent>
