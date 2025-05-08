@@ -2,20 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  BarChart3,
-  Calendar,
-  FileText,
-  Home,
-  Mail,
-  Settings,
-  Users,
-  Bell,
-  Database,
-  BriefcaseBusiness,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react"
+import { Calendar, FileText, Home, Mail, BriefcaseBusiness, ChevronDown, ChevronRight, LogOut } from "lucide-react"
 import { useState } from "react"
 import LogoutModal from "./logout-modal"
 
@@ -24,6 +11,7 @@ export default function Sidebar() {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     blog: false, // Blog menüsü varsayılan olarak kapalı
   })
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const toggleMenu = (menu: string) => {
     setOpenMenus((prev) => ({
@@ -161,64 +149,21 @@ export default function Sidebar() {
             </div>
           )}
         </div>
-
-        <Link
-          href="/admin/users"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/users") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Users className="h-5 w-5" />
-          <span>Kullanıcılar</span>
-        </Link>
-
-        <Link
-          href="/admin/reports"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/reports") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <BarChart3 className="h-5 w-5" />
-          <span>Raporlar</span>
-        </Link>
-
-        <Link
-          href="/admin/notifications"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/notifications")
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Bell className="h-5 w-5" />
-          <span>Bildirimler</span>
-        </Link>
-
-        <Link
-          href="/admin/database"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/database") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Database className="h-5 w-5" />
-          <span>Veritabanı</span>
-        </Link>
-
-        <Link
-          href="/admin/settings"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/settings") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Settings className="h-5 w-5" />
-          <span>Ayarlar</span>
-        </Link>
       </nav>
 
       {/* Çıkış Yap Butonu - Sidebar'ın alt kısmında */}
       <div className="mt-auto px-2 pt-4 border-t border-gray-200">
-        <LogoutModal />
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="flex items-center space-x-2 w-full px-3 py-2 rounded-md transition-colors text-red-600 hover:bg-red-50"
+        >
+          <LogOut className="h-5 w-5" />
+          <span>Çıkış Yap</span>
+        </button>
       </div>
+
+      {/* Çıkış Yap Modal */}
+      {showLogoutModal && <LogoutModal open={showLogoutModal} onOpenChange={setShowLogoutModal} />}
     </div>
   )
 }
