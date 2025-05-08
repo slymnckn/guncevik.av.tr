@@ -7,17 +7,32 @@ let adminSupabaseClient: ReturnType<typeof supabaseCreateClient<Database>> | nul
 export const createAdminSupabaseClient = () => {
   if (adminSupabaseClient) return adminSupabaseClient
 
-  adminSupabaseClient = supabaseCreateClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
+  // Çevre değişkenlerini kontrol et
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    console.error("Supabase çevre değişkenleri eksik:", {
+      url: supabaseUrl ? "Mevcut" : "Eksik",
+      key: supabaseServiceRoleKey ? "Mevcut" : "Eksik",
+    })
+    throw new Error("Supabase çevre değişkenleri eksik")
+  }
+
+  try {
+    adminSupabaseClient = supabaseCreateClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         persistSession: false,
+        autoRefreshToken: false,
       },
-    },
-  )
+    })
 
-  return adminSupabaseClient
+    console.log("Admin Supabase client başarıyla oluşturuldu")
+    return adminSupabaseClient
+  } catch (error) {
+    console.error("Admin Supabase client oluşturulurken hata:", error)
+    throw new Error("Admin Supabase client oluşturulurken hata")
+  }
 }
 
 // Geriye dönük uyumluluk için createServerSupabaseClient alias'ı
@@ -25,8 +40,6 @@ export const createServerSupabaseClient = createAdminSupabaseClient
 
 // Geriye dönük uyumluluk için createClient export'u
 export const createClient = createAdminSupabaseClient
-
-// Orijinal createClient fonksiyonunu da export edelim
 
 // Admin profil kontrolü
 export async function getAdminProfile(userId: string) {
