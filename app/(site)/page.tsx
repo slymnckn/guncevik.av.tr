@@ -18,9 +18,52 @@ export default async function Home() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
 
   // Veritabanından hizmetleri al
-  const services = await getServices()
-  // Öne çıkan hizmetleri filtrele ve en fazla 3 tane göster
-  const featuredServices = services.filter((service) => service.is_featured).slice(0, 3)
+  let services = []
+  let featuredServices = []
+
+  try {
+    services = await getServices()
+    // Öne çıkan hizmetleri filtrele ve en fazla 3 tane göster
+    featuredServices = services.filter((service) => service.is_featured).slice(0, 3)
+  } catch (error) {
+    console.error("Hizmetler yüklenirken hata oluştu:", error)
+    // Hata durumunda boş array kullan
+    services = []
+    featuredServices = []
+  }
+
+  // Varsayılan hizmetler
+  const defaultServices = [
+    {
+      id: 1,
+      title: "Ticaret Hukuku",
+      description:
+        "Şirket kuruluşları, birleşme ve devralmalar, ticari sözleşmeler ve uyuşmazlık çözümleri konularında uzman danışmanlık.",
+      icon: "briefcase",
+      slug: "ticaret-hukuku",
+    },
+    {
+      id: 2,
+      title: "Sigorta Hukuku",
+      description:
+        "Trafik kazaları, iş kazaları, mal ve can kayıpları, sağlık sigortası anlaşmazlıkları konularında hukuki destek.",
+      icon: "shield",
+      slug: "sigorta-hukuku",
+    },
+    {
+      id: 3,
+      title: "İş Hukuku",
+      description:
+        "İşçi-işveren ilişkileri, iş sözleşmeleri, işe iade davaları, tazminat talepleri konularında hukuki danışmanlık.",
+      icon: "users",
+      slug: "is-hukuku",
+    },
+  ]
+
+  // Eğer featuredServices boşsa, varsayılan hizmetleri kullan
+  if (featuredServices.length === 0) {
+    featuredServices = defaultServices
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -103,67 +146,13 @@ export default async function Home() {
           subtitle="Geniş bir yelpazede hukuki hizmetler sunuyoruz. İhtiyacınıza uygun çözümler için yanınızdayız."
         />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredServices.length > 0 ? (
-            featuredServices.map((service) => (
-              <div
-                key={service.id}
-                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg"
-              >
-                <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                  {service.icon ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-8 w-8 text-primary"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d={
-                          service.icon === "briefcase"
-                            ? "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            : service.icon === "shield"
-                              ? "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                              : service.icon === "users"
-                                ? "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                : "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" // default icon
-                        }
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-8 w-8 text-primary"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <h3 className="text-xl font-bold mb-3">{service.title}</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">{service.description}</p>
-                <Button asChild variant="link" className="p-0">
-                  <Link href={`/hizmetlerimiz/${service.slug}`} className="flex items-center">
-                    Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            ))
-          ) : (
-            // Eğer veritabanında hizmet yoksa varsayılan 3 hizmet göster
-            <>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg">
-                <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+          {featuredServices.map((service) => (
+            <div
+              key={service.id}
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg"
+            >
+              <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+                {service.icon ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-8 w-8 text-primary"
@@ -175,23 +164,18 @@ export default async function Home() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      d={
+                        service.icon === "briefcase"
+                          ? "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          : service.icon === "shield"
+                            ? "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                            : service.icon === "users"
+                              ? "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                              : "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" // default icon
+                      }
                     />
                   </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-3">Ticaret Hukuku</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  Şirket kuruluşları, birleşme ve devralmalar, ticari sözleşmeler ve uyuşmazlık çözümleri konularında
-                  uzman danışmanlık.
-                </p>
-                <Button asChild variant="link" className="p-0">
-                  <Link href="/hizmetlerimiz#ticaret" className="flex items-center">
-                    Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg">
-                <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+                ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-8 w-8 text-primary"
@@ -203,51 +187,20 @@ export default async function Home() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-3">Sigorta Hukuku</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  Trafik kazaları, iş kazaları, mal ve can kayıpları, sağlık sigortası anlaşmazlıkları konularında
-                  hukuki destek.
-                </p>
-                <Button asChild variant="link" className="p-0">
-                  <Link href="/hizmetlerimiz#sigorta" className="flex items-center">
-                    Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
+                )}
               </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg">
-                <div className="bg-primary/10 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-primary"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-3">İş Hukuku</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  İşçi-işveren ilişkileri, iş sözleşmeleri, işe iade davaları, tazminat talepleri konularında hukuki
-                  danışmanlık.
-                </p>
-                <Button asChild variant="link" className="p-0">
-                  <Link href="/hizmetlerimiz#is" className="flex items-center">
-                    Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </>
-          )}
+              <h3 className="text-xl font-bold mb-3">{service.title}</h3>
+              <p className="mb-4 text-gray-600 dark:text-gray-300">{service.description}</p>
+              <Button asChild variant="link" className="p-0">
+                <Link href={`/hizmetlerimiz/${service.slug}`} className="flex items-center">
+                  Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          ))}
         </div>
         <div className="text-center mt-8">
           <Button asChild className="bg-primary hover:bg-primary/90">

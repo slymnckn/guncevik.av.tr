@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { Suspense } from "react"
+import { SpeedInsights } from "@/components/analytics/speed-insights"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -49,6 +50,7 @@ export default function RootLayout({
             {/* Analytics Provider domain geçişinden sonra eklenecek */}
           </ThemeProvider>
         </ErrorBoundary>
+        <SpeedInsights />
       </body>
     </html>
   )
