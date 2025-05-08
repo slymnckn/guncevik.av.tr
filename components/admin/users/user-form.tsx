@@ -127,8 +127,6 @@ export function UserForm({ user, isEditing = false }: UserFormProps) {
                 <SelectItem value="viewer">Görüntüleyici</SelectItem>
               </SelectContent>
             </Select>
-            {/* Hidden input to ensure role is included in form submission */}
-            <input type="hidden" name="role" value={role} />
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">

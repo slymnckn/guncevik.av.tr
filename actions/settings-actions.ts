@@ -1,56 +1,90 @@
 "use server"
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createAdminSupabaseClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function getSettings() {
-  const supabase = createServerActionClient({ cookies })
+  try {
+    const supabase = createAdminSupabaseClient()
 
-  // Kullanıcının oturum açıp açmadığını kontrol et
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    const { data, error } = await supabase.from("site_settings").select("*")
 
-  if (!session) {
-    throw new Error("Unauthorized")
+    if (error) {
+      console.error("Ayarlar yüklenirken hata:", error)
+      throw new Error("Ayarlar yüklenirken bir hata oluştu.")
+    }
+
+    // Ayarları key-value formatına dönüştür
+    const settings: Record<string, string> = {}
+    data.forEach((item) => {
+      settings[item.setting_key] = item.setting_value
+    })
+
+    return settings
+  } catch (error) {
+    console.error("Ayarlar yüklenirken hata:", error)
+    throw new Error("Ayarlar yüklenirken bir hata oluştu.")
   }
-
-  // Ayarları getir
-  const { data, error } = await supabase.from("settings").select("*")
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  // Ayarları key-value formatına dönüştür
-  const settings = data.reduce((acc: Record<string, any>, item) => {
-    acc[item.id] = item.value
-    return acc
-  }, {})
-
-  return settings
 }
 
-export async function updateSettings(id: string, value: any) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateSetting(key: string, value: string) {
+  try {
+    const supabase = createAdminSupabaseClient()
 
-  // Kullanıcının oturum açıp açmadığını kontrol et
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    // Ayarın mevcut olup olmadığını kontrol et
+    const { data: existingData, error: existingError } = await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("setting_key", key)
+      .single()
 
-  if (!session) {
-    throw new Error("Unauthorized")
+    if (existingError && existingError.code !== "PGRST116") {
+      // PGRST116: Sonuç bulunamadı hatası
+      console.error("Ayar kontrol edilirken hata:", existingError)
+      throw new Error("Ayar kontrol edilirken bir hata oluştu.")
+    }
+
+    let result
+    if (existingData) {
+      // Mevcut ayarı güncelle
+      const { data, error } = await supabase
+        .from("site_settings")
+        .update({ setting_value: value, updated_at: new Date().toISOString() })
+        .eq("setting_key", key)
+        .select()
+
+      if (error) {
+        console.error("Ayar güncellenirken hata:", error)
+        throw new Error("Ayar güncellenirken bir hata oluştu.")
+      }
+
+      result = data[0]
+    } else {
+      // Yeni ayar ekle
+      const { data, error } = await supabase
+        .from("site_settings")
+        .insert({
+          setting_key: key,
+          setting_value: value,
+          setting_type: "text",
+        })
+        .select()
+
+      if (error) {
+        console.error("Ayar eklenirken hata:", error)
+        throw new Error("Ayar eklenirken bir hata oluştu.")
+      }
+
+      result = data[0]
+    }
+
+    // Tüm sayfaları yenile
+    revalidatePath("/")
+    revalidatePath("/admin/site-settings")
+
+    return result
+  } catch (error) {
+    console.error("Ayar güncellenirken hata:", error)
+    throw new Error("Ayar güncellenirken bir hata oluştu.")
   }
-
-  // Ayarı güncelle
-  const { data, error } = await supabase.from("settings").upsert({ id, value, updated_by: session.user.id }).select()
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  revalidatePath("/admin/settings")
-  return data[0]
 }
