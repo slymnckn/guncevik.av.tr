@@ -30,7 +30,15 @@ export function UserForm({ user, isEditing = false }: UserFormProps) {
 
     try {
       const formData = new FormData(event.currentTarget)
+
+      // Rol değerini formData'ya ekle
       formData.set("role", role)
+
+      console.log("Form gönderiliyor:", {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        role: formData.get("role"),
+      })
 
       let result
       if (isEditing && user) {
@@ -45,12 +53,18 @@ export function UserForm({ user, isEditing = false }: UserFormProps) {
           description: result.error,
           variant: "destructive",
         })
+        console.error("Form hatası:", result.error)
       } else {
         toast({
           title: "Başarılı",
           description: isEditing ? "Kullanıcı başarıyla güncellendi." : "Kullanıcı başarıyla oluşturuldu.",
         })
-        router.push("/admin/users")
+
+        // Yönlendirme öncesi kısa bir gecikme ekleyelim
+        setTimeout(() => {
+          router.push("/admin/users")
+          router.refresh()
+        }, 1000)
       }
     } catch (error) {
       console.error("Form gönderilirken hata:", error)
@@ -113,6 +127,8 @@ export function UserForm({ user, isEditing = false }: UserFormProps) {
                 <SelectItem value="viewer">Görüntüleyici</SelectItem>
               </SelectContent>
             </Select>
+            {/* Hidden input to ensure role is included in form submission */}
+            <input type="hidden" name="role" value={role} />
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">

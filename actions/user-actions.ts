@@ -54,6 +54,8 @@ export async function createUser(formData: FormData) {
     const name = formData.get("name") as string
     const role = formData.get("role") as string
 
+    console.log("Kullanıcı oluşturma verileri:", { email, name, role }) // Debug için log
+
     // Kullanıcı oluştur
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
@@ -95,6 +97,8 @@ export async function updateUser(userId: string, formData: FormData) {
     const name = formData.get("name") as string
     const role = formData.get("role") as string
     const password = formData.get("password") as string
+
+    console.log("Kullanıcı güncelleme verileri:", { email, name, role }) // Debug için log
 
     // Kullanıcı güncelle
     if (password) {
