@@ -1,216 +1,173 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { tr } from "date-fns/locale"
-import { CalendarIcon, Loader2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function AppointmentForm() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [date, setDate] = useState<Date | undefined>(undefined)
-  const [time, setTime] = useState("")
-  const [subject, setSubject] = useState("")
-  const [message, setMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [formStatus, setFormStatus] = useState<{
+    success?: boolean
+    message?: string
+  }>({})
 
-  const availableTimes = [
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30",
-    "16:00",
-    "16:30",
-    "17:00",
-    "17:30",
-  ]
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitResult(null)
-
-    // Form doğrulama
-    if (!name || !email || !phone || !date || !time) {
-      setSubmitResult({
-        success: false,
-        message: "Lütfen tüm zorunlu alanları doldurun.",
-      })
-      setIsSubmitting(false)
-      return
-    }
-
+  async function handleSubmit(formData: FormData) {
     try {
-      // Burada gerçek bir API çağrısı yapılacak
-      // Şimdilik simüle ediyoruz
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      setIsSubmitting(true)
+      //   const result = await createAppointment(formData) // Assuming createAppointment is defined elsewhere
 
-      setSubmitResult({
+      //   if (result.success) {
+      setFormStatus({
         success: true,
         message: "Randevu talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.",
       })
-
       // Formu sıfırla
-      setName("")
-      setEmail("")
-      setPhone("")
-      setDate(undefined)
-      setTime("")
-      setSubject("")
-      setMessage("")
+      const form = document.getElementById("appointment-form") as HTMLFormElement
+      form?.reset()
+      //   } else {
+      //     setFormStatus({
+      //       success: false,
+      //       message: result.message || "Randevu oluşturulurken bir hata oluştu.",
+      //     });
+      //   }
     } catch (error) {
-      setSubmitResult({
+      console.error("Randevu oluşturma hatası:", error)
+      setFormStatus({
         success: false,
-        message: "Randevu talebiniz gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+        message: error instanceof Error ? error.message : "Randevu oluşturulurken bir hata oluştu.",
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6">Randevu Formu</h2>
+  const today = new Date().toISOString().split("T")[0]
 
-      {submitResult && (
-        <Alert variant={submitResult.success ? "default" : "destructive"} className="mb-6">
-          <AlertDescription>{submitResult.message}</AlertDescription>
-        </Alert>
+  return (
+    <form id="appointment-form" action={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            İsim Soyisim *
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            E-posta *
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            Telefon *
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+            Konu
+          </label>
+          <input
+            id="subject"
+            name="subject"
+            type="text"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 mb-1">
+            Randevu Tarihi *
+          </label>
+          <input
+            id="appointmentDate"
+            name="appointmentDate"
+            type="date"
+            min={today}
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="appointmentTime" className="block text-sm font-medium text-gray-700 mb-1">
+            Randevu Saati *
+          </label>
+          <select
+            id="appointmentTime"
+            name="appointmentTime"
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="">Saat Seçin</option>
+            <option value="09:00">09:00</option>
+            <option value="09:30">09:30</option>
+            <option value="10:00">10:00</option>
+            <option value="10:30">10:30</option>
+            <option value="11:00">11:00</option>
+            <option value="11:30">11:30</option>
+            <option value="13:00">13:00</option>
+            <option value="13:30">13:30</option>
+            <option value="14:00">14:00</option>
+            <option value="14:30">14:30</option>
+            <option value="15:00">15:00</option>
+            <option value="15:30">15:30</option>
+            <option value="16:00">16:00</option>
+            <option value="16:30">16:30</option>
+            <option value="17:00">17:00</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+          Mesajınız
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows={4}
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+        ></textarea>
+      </div>
+
+      {formStatus.message && (
+        <div
+          className={`p-3 rounded-md ${formStatus.success ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}
+        >
+          {formStatus.message}
+        </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="space-y-2">
-          <Label htmlFor="name">Ad Soyad *</Label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Adınız ve soyadınız"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">E-posta *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-posta adresiniz"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phone">Telefon *</Label>
-          <Input
-            id="phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Telefon numaranız"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Randevu Tarihi *</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP", { locale: tr }) : "Tarih seçin"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-                disabled={(date) => {
-                  const day = date.getDay()
-                  // Cumartesi (6) ve Pazar (0) günlerini devre dışı bırak
-                  return day === 0 || day === 6 || date < new Date()
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="time">Randevu Saati *</Label>
-          <Select value={time} onValueChange={setTime}>
-            <SelectTrigger>
-              <SelectValue placeholder="Saat seçin" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableTimes.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="subject">Konu</Label>
-          <Input
-            id="subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            placeholder="Randevu konusu"
-          />
-        </div>
+      <div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-75"
+        >
+          {isSubmitting ? "Gönderiliyor..." : "Randevu Oluştur"}
+        </button>
       </div>
-
-      <div className="space-y-2 mb-6">
-        <Label htmlFor="message">Mesaj</Label>
-        <Textarea
-          id="message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Randevu ile ilgili detaylar"
-          rows={4}
-        />
-      </div>
-
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gönderiliyor...
-          </>
-        ) : (
-          "Randevu Talep Et"
-        )}
-      </Button>
     </form>
   )
 }
-
-export default AppointmentForm

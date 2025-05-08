@@ -1,11 +1,37 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
+import { createServerClient } from "@supabase/ssr"
 import { revalidatePath } from "next/cache"
+import type { Database } from "@/lib/types/database"
 
 export async function updateAppointmentStatus(id: string, status: string, notes?: string) {
-  const supabase = createServerActionClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can't be set in middleware
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: "", ...options })
+          } catch (error) {
+            // Cookies can't be removed in middleware
+          }
+        },
+      },
+    },
+  )
 
   const { error } = await supabase
     .from("appointments")
@@ -17,7 +43,7 @@ export async function updateAppointmentStatus(id: string, status: string, notes?
     .eq("id", id)
 
   if (error) {
-    console.error("Error updating appointment status:", error)
+    console.error("Randevu durumu güncellenirken hata:", error)
     throw new Error("Randevu durumu güncellenirken bir hata oluştu.")
   }
 
@@ -27,12 +53,37 @@ export async function updateAppointmentStatus(id: string, status: string, notes?
 }
 
 export async function deleteAppointment(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can't be set in middleware
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: "", ...options })
+          } catch (error) {
+            // Cookies can't be removed in middleware
+          }
+        },
+      },
+    },
+  )
 
   const { error } = await supabase.from("appointments").delete().eq("id", id)
 
   if (error) {
-    console.error("Error deleting appointment:", error)
+    console.error("Randevu silinirken hata:", error)
     throw new Error("Randevu silinirken bir hata oluştu.")
   }
 
@@ -41,7 +92,33 @@ export async function deleteAppointment(id: string) {
 }
 
 export async function createAppointment(formData: FormData) {
-  const supabase = createServerActionClient({ cookies })
+  console.log("Randevu oluşturma başladı")
+  const cookieStore = cookies()
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can't be set in middleware
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: "", ...options })
+          } catch (error) {
+            // Cookies can't be removed in middleware
+          }
+        },
+      },
+    },
+  )
 
   const name = formData.get("name") as string
   const email = formData.get("email") as string
@@ -51,26 +128,41 @@ export async function createAppointment(formData: FormData) {
   const subject = formData.get("subject") as string
   const message = formData.get("message") as string
 
-  if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
-    throw new Error("Lütfen tüm zorunlu alanları doldurun.")
-  }
-
-  const { error } = await supabase.from("appointments").insert({
+  console.log("Randevu verileri:", {
     name,
     email,
     phone,
-    appointment_date: appointmentDate,
-    appointment_time: appointmentTime,
+    appointmentDate,
+    appointmentTime,
     subject,
     message,
-    status: "pending",
   })
 
-  if (error) {
-    console.error("Error creating appointment:", error)
-    throw new Error("Randevu oluşturulurken bir hata oluştu.")
+  if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
+    console.error("Eksik alanlar:", { name, email, phone, appointmentDate, appointmentTime })
+    throw new Error("Lütfen tüm zorunlu alanları doldurun.")
   }
 
+  const { data, error } = await supabase
+    .from("appointments")
+    .insert({
+      name,
+      email,
+      phone,
+      appointment_date: appointmentDate,
+      appointment_time: appointmentTime,
+      subject,
+      message,
+      status: "pending",
+    })
+    .select()
+
+  if (error) {
+    console.error("Randevu oluşturulurken hata:", error)
+    throw new Error("Randevu oluşturulurken bir hata oluştu: " + error.message)
+  }
+
+  console.log("Randevu başarıyla oluşturuldu:", data)
   revalidatePath("/admin/appointments")
-  return { success: true }
+  return { success: true, data }
 }

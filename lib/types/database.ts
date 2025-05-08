@@ -5,31 +5,37 @@ export interface Database {
     Tables: {
       admin_profiles: {
         Row: {
-          created_at: string
-          email: string
           id: string
-          name: string | null
+          created_at: string
+          updated_at: string | null
+          email: string
           role: string
-          updated_at: string
+          name: string | null
+          avatar_url: string | null
         }
         Insert: {
-          email: string
           id: string
-          name?: string | null
+          created_at?: string
+          updated_at?: string | null
+          email: string
           role: string
-          updated_at?: string
+          name?: string | null
+          avatar_url?: string | null
         }
         Update: {
-          email?: string
           id?: string
-          name?: string | null
+          created_at?: string
+          updated_at?: string | null
+          email?: string
           role?: string
-          updated_at?: string
+          name?: string | null
+          avatar_url?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "admin_profiles_id_fkey"
             columns: ["id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -37,48 +43,59 @@ export interface Database {
       }
       appointments: {
         Row: {
+          id: string
+          created_at: string
+          updated_at: string | null
+          name: string
+          email: string
+          phone: string
           appointment_date: string
           appointment_time: string
-          created_at: string
-          email: string
-          id: string
-          message: string | null
-          name: string
-          notes: string | null
-          phone: string
-          status: string
           subject: string | null
-          updated_at: string | null
+          message: string | null
+          status: string
+          notes: string | null
+          assigned_to: string | null
         }
         Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string | null
+          name: string
+          email: string
+          phone: string
           appointment_date: string
           appointment_time: string
-          created_at?: string
-          email: string
-          id?: string
-          message?: string | null
-          name: string
-          notes?: string | null
-          phone: string
-          status?: string
           subject?: string | null
-          updated_at?: string | null
+          message?: string | null
+          status?: string
+          notes?: string | null
+          assigned_to?: string | null
         }
         Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string | null
+          name?: string
+          email?: string
+          phone?: string
           appointment_date?: string
           appointment_time?: string
-          created_at?: string
-          email?: string
-          id?: string
-          message?: string | null
-          name?: string
-          notes?: string | null
-          phone?: string
-          status?: string
           subject?: string | null
-          updated_at?: string | null
+          message?: string | null
+          status?: string
+          notes?: string | null
+          assigned_to?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appointments_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       blog_categories: {
         Row: {
