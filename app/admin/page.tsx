@@ -2,12 +2,12 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createClientSupabaseClient } from "@/lib/supabase/client"
+import { getSupabaseClient } from "@/lib/supabase/client"
 import { Loader2 } from "lucide-react"
 
 export default function AdminRedirect() {
   const router = useRouter()
-  const supabase = createClientSupabaseClient()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     const checkAndRedirect = async () => {
