@@ -2,9 +2,8 @@ import Link from "next/link"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { StatusBadge } from "@/lib/utils/status-helpers"
-import { createServerClient } from "@supabase/ssr"
+import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
-import type { Database } from "@/lib/types/database"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -12,32 +11,7 @@ export const revalidate = 0
 export default async function AppointmentsPage() {
   console.log("Randevular sayfası yükleniyor...")
 
-  const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          try {
-            cookieStore.set({ name, value, ...options })
-          } catch (error) {
-            // Cookies can't be set in middleware
-          }
-        },
-        remove(name: string, options: any) {
-          try {
-            cookieStore.set({ name, value: "", ...options })
-          } catch (error) {
-            // Cookies can't be removed in middleware
-          }
-        },
-      },
-    },
-  )
+  const supabase = createServerActionClient({ cookies })
 
   try {
     const { data: appointments, error } = await supabase

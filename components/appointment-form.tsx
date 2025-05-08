@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { createAppointment } from "@/actions/appointment-actions"
 
 export function AppointmentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -12,22 +13,41 @@ export function AppointmentForm() {
   async function handleSubmit(formData: FormData) {
     try {
       setIsSubmitting(true)
-      //   const result = await createAppointment(formData) // Assuming createAppointment is defined elsewhere
+      console.log("Randevu formu gönderiliyor...")
 
-      //   if (result.success) {
-      setFormStatus({
-        success: true,
-        message: "Randevu talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.",
-      })
-      // Formu sıfırla
-      const form = document.getElementById("appointment-form") as HTMLFormElement
-      form?.reset()
-      //   } else {
-      //     setFormStatus({
-      //       success: false,
-      //       message: result.message || "Randevu oluşturulurken bir hata oluştu.",
-      //     });
-      //   }
+      // Form verilerini kontrol et
+      const name = formData.get("name") as string
+      const email = formData.get("email") as string
+      const phone = formData.get("phone") as string
+      const appointmentDate = formData.get("appointmentDate") as string
+      const appointmentTime = formData.get("appointmentTime") as string
+
+      console.log("Form verileri:", { name, email, phone, appointmentDate, appointmentTime })
+
+      if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
+        setFormStatus({
+          success: false,
+          message: "Lütfen tüm zorunlu alanları doldurun.",
+        })
+        return
+      }
+
+      const result = await createAppointment(formData)
+
+      if (result.success) {
+        setFormStatus({
+          success: true,
+          message: "Randevu talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.",
+        })
+        // Formu sıfırla
+        const form = document.getElementById("appointment-form") as HTMLFormElement
+        form?.reset()
+      } else {
+        setFormStatus({
+          success: false,
+          message: "Randevu oluşturulurken bir hata oluştu.",
+        })
+      }
     } catch (error) {
       console.error("Randevu oluşturma hatası:", error)
       setFormStatus({
@@ -171,3 +191,5 @@ export function AppointmentForm() {
     </form>
   )
 }
+
+export default AppointmentForm
