@@ -27,12 +27,28 @@ export function createServerSupabaseClient() {
             // Cookies can't be removed in middleware
           }
         },
+        // Eksik olan getAll ve setAll fonksiyonlarını ekleyelim
+        getAll() {
+          return cookieStore.getAll().map((cookie) => ({
+            name: cookie.name,
+            value: cookie.value,
+          }))
+        },
+        setAll(cookieList) {
+          try {
+            cookieList.forEach((cookie) => {
+              cookieStore.set(cookie)
+            })
+          } catch (error) {
+            // Cookies can't be set in middleware
+          }
+        },
       },
     },
   )
 }
 
-// Eksik olan createClient fonksiyonunu ekleyelim
+// createClient fonksiyonu
 export const createClient = createServerSupabaseClient
 
 export function createAdminSupabaseClient() {
