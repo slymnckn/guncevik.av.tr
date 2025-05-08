@@ -66,7 +66,7 @@ export default async function ServicesPage() {
       title: "İCRA İFLAS HUKUKU",
       description:
         "Müvekkillerimizin alacaklarının tahsil edilmesi amacıyla icra takibi sürecinin hızlı ve etkin bir şekilde yürütülmesi için hukuki destek sunuyoruz.",
-      icon: "dollar-sign",
+      icon: "dollarSign", // "dollar-sign" yerine "dollarSign" kullanıldı
       slug: "icra-iflas-hukuku",
     },
     {
@@ -74,7 +74,7 @@ export default async function ServicesPage() {
       title: "İDARE VE VERGİ HUKUKU",
       description:
         "İdari eylem ve işlemlerden kaynaklanan iptal ve tam yargı davaları, yürütmenin durdurulması talepleri, vergi cezalarına itiraz, uzlaşma görüşmeleri, vergi cezalarının iptali davaları konusunda hukuki hizmet vermekteyiz.",
-      icon: "file-text",
+      icon: "fileText", // "file-text" yerine "fileText" kullanıldı
       slug: "idare-ve-vergi-hukuku",
     },
     {
