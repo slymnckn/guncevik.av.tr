@@ -163,7 +163,7 @@ export default function Sidebar() {
       </div>
 
       {/* Çıkış Yap Modal */}
-      {showLogoutModal && <LogoutModal open={showLogoutModal} onOpenChange={setShowLogoutModal} />}
+      <LogoutModal open={showLogoutModal} onOpenChange={setShowLogoutModal} />
     </div>
   )
 }

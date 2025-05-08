@@ -3,7 +3,16 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Calendar, FileText, Users, ArrowRight, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import {
+  MessageSquare,
+  Calendar,
+  FileText,
+  ArrowRight,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  BriefcaseBusiness,
+} from "lucide-react"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { tr } from "date-fns/locale"
@@ -19,8 +28,7 @@ const initialStats = {
   newAppointments: 0,
   totalBlogPosts: 0,
   newBlogPosts: 0,
-  totalUsers: 0,
-  newUsers: 0,
+  totalServices: 0,
 }
 
 export default function DashboardPage() {
@@ -53,6 +61,12 @@ export default function DashboardPage() {
           const { count: totalBlogPosts } = await supabase
             .from("blog_posts")
             .select("*", { count: "exact", head: true })
+
+          // Toplam aktif hizmet sayısı
+          const { count: totalServices } = await supabase
+            .from("services")
+            .select("*", { count: "exact", head: true })
+            .eq("active", true)
 
           // Son 7 gündeki yeni iletişim mesajları
           const sevenDaysAgo = new Date()
@@ -87,8 +101,7 @@ export default function DashboardPage() {
             newAppointments: newAppointments || 0,
             totalBlogPosts: totalBlogPosts || 0,
             newBlogPosts: newBlogPosts || 0,
-            totalUsers: 0,
-            newUsers: 0,
+            totalServices: totalServices || 0,
           }
         }
 
@@ -202,15 +215,16 @@ export default function DashboardPage() {
         <Card className={isLoading ? "opacity-60" : ""}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Aktif Hizmetler</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <BriefcaseBusiness className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">-</div>
+            <div className="text-2xl font-bold">{stats.totalServices}</div>
             <p className="text-xs text-muted-foreground">Aktif hizmet sayısı</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Diğer içerikler aynı kalacak */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Son İletişim Mesajları */}
         <Card className={isLoading ? "opacity-60" : ""}>

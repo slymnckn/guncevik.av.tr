@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { LogOut } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -10,15 +9,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 
-export default function LogoutModal() {
+interface LogoutModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export default function LogoutModal({ open, onOpenChange }: LogoutModalProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [open, setOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -52,18 +54,12 @@ export default function LogoutModal() {
       })
     } finally {
       setIsLoading(false)
-      setOpen(false)
+      onOpenChange(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="flex items-center space-x-2 px-3 py-2 w-full text-left rounded-md transition-colors text-red-600 hover:bg-red-50">
-          <LogOut className="h-5 w-5" />
-          <span>Çıkış Yap</span>
-        </button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Çıkış Yapmak İstiyor musunuz?</DialogTitle>
@@ -72,7 +68,7 @@ export default function LogoutModal() {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             İptal
           </Button>
           <Button variant="destructive" onClick={handleLogout} disabled={isLoading}>
