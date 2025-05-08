@@ -18,13 +18,15 @@ export default function AppointmentActions({ appointment }: { appointment: any }
       setIsSubmitting(true)
       setError(null)
 
-      console.log(`Randevu durumu güncelleniyor: ${appointment.id}, ${newStatus}`)
+      console.log(`Client: Randevu durumu güncelleniyor - ID: ${appointment.id}, Status: ${newStatus}`)
       await updateAppointmentStatus(appointment.id, newStatus, appointment.notes)
 
-      console.log("Randevu durumu güncellendi")
+      console.log("Client: Randevu durumu güncellendi")
+
+      // Sayfayı yenile
       router.refresh()
     } catch (err) {
-      console.error("Durum güncellenirken hata:", err)
+      console.error("Client: Durum güncellenirken hata:", err)
       setError(err instanceof Error ? err.message : "Durum güncellenirken bir hata oluştu")
     } finally {
       setIsSubmitting(false)
@@ -36,14 +38,16 @@ export default function AppointmentActions({ appointment }: { appointment: any }
       setIsSubmitting(true)
       setError(null)
 
-      console.log(`Randevu notları güncelleniyor: ${appointment.id}`)
+      console.log(`Client: Randevu notları güncelleniyor - ID: ${appointment.id}`)
       await updateAppointmentStatus(appointment.id, status, notes)
 
-      console.log("Randevu notları güncellendi")
+      console.log("Client: Randevu notları güncellendi")
       setIsUpdateDialogOpen(false)
+
+      // Sayfayı yenile
       router.refresh()
     } catch (err) {
-      console.error("Notlar güncellenirken hata:", err)
+      console.error("Client: Notlar güncellenirken hata:", err)
       setError(err instanceof Error ? err.message : "Notlar güncellenirken bir hata oluştu")
     } finally {
       setIsSubmitting(false)
@@ -55,13 +59,15 @@ export default function AppointmentActions({ appointment }: { appointment: any }
       setIsSubmitting(true)
       setError(null)
 
-      console.log(`Randevu siliniyor: ${appointment.id}`)
+      console.log(`Client: Randevu siliniyor - ID: ${appointment.id}`)
       await deleteAppointment(appointment.id)
 
-      console.log("Randevu silindi")
+      console.log("Client: Randevu silindi")
+
+      // Randevular sayfasına yönlendir
       router.push("/admin/appointments")
     } catch (err) {
-      console.error("Randevu silinirken hata:", err)
+      console.error("Client: Randevu silinirken hata:", err)
       setError(err instanceof Error ? err.message : "Randevu silinirken bir hata oluştu")
     } finally {
       setIsSubmitting(false)

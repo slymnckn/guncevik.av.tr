@@ -1,8 +1,7 @@
-import { createAdminSupabaseClient } from "@/lib/supabase/server"
-import { notFound } from "next/navigation"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import AppointmentActions from "./actions"
+import { getAppointmentById } from "@/actions/appointment-actions"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -12,24 +11,8 @@ export default async function AppointmentDetailPage({ params }: { params: { id: 
   console.log("Randevu detay sayfası yükleniyor, ID:", id)
 
   try {
-    // Admin yetkilerine sahip Supabase client kullanıyoruz
-    const supabase = createAdminSupabaseClient()
-
     // Randevu verilerini getir
-    const { data: appointment, error } = await supabase.from("appointments").select("*").eq("id", id).single()
-
-    // Hata kontrolü
-    if (error) {
-      console.error("Randevu verisi getirilirken hata:", error)
-      throw new Error(`Randevu verisi getirilirken hata: ${error.message}`)
-    }
-
-    if (!appointment) {
-      console.error("Randevu bulunamadı, ID:", id)
-      return notFound()
-    }
-
-    console.log("Randevu verisi başarıyla getirildi:", appointment)
+    const appointment = await getAppointmentById(id)
 
     // Kullanıcı dostu görünüm
     return (

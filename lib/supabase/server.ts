@@ -27,7 +27,6 @@ export const createAdminSupabaseClient = () => {
       },
     })
 
-    console.log("Admin Supabase client başarıyla oluşturuldu")
     return adminSupabaseClient
   } catch (error) {
     console.error("Admin Supabase client oluşturulurken hata:", error)

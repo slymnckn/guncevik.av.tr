@@ -1,127 +1,100 @@
 "use server"
-
-import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
 import { revalidatePath } from "next/cache"
-import type { Database } from "@/lib/types/database"
-import { createAdminSupabaseClient } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
+
+// Doğrudan Supabase bağlantısı oluştur
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+})
 
 export async function updateAppointmentStatus(id: string, status: string, notes?: string) {
-  const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          try {
-            cookieStore.set({ name, value, ...options })
-          } catch (error) {
-            // Cookies can't be set in middleware
-          }
-        },
-        remove(name: string, options: any) {
-          try {
-            cookieStore.set({ name, value: "", ...options })
-          } catch (error) {
-            // Cookies can't be removed in middleware
-          }
-        },
-      },
-    },
-  )
+  try {
+    console.log(`Server: Randevu durumu güncelleniyor - ID: ${id}, Status: ${status}`)
 
-  const { error } = await supabase
-    .from("appointments")
-    .update({
-      status,
-      notes,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id)
+    // Doğrudan Supabase bağlantısı kullan
+    const { error } = await supabase
+      .from("appointments")
+      .update({
+        status,
+        notes,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
 
-  if (error) {
-    console.error("Randevu durumu güncellenirken hata:", error)
-    throw new Error("Randevu durumu güncellenirken bir hata oluştu.")
+    if (error) {
+      console.error("Server: Randevu durumu güncellenirken hata:", error)
+      throw new Error(`Randevu durumu güncellenirken hata: ${error.message}`)
+    }
+
+    console.log("Server: Randevu durumu başarıyla güncellendi")
+
+    // Sayfaları yenile
+    revalidatePath("/admin/appointments")
+    revalidatePath(`/admin/appointments/${id}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error("Server: Randevu durumu güncelleme exception:", error)
+    throw new Error(
+      `Randevu durumu güncellenirken bir hata oluştu: ${error instanceof Error ? error.message : String(error)}`,
+    )
   }
-
-  revalidatePath("/admin/appointments")
-  revalidatePath(`/admin/appointments/${id}`)
-  return { success: true }
 }
 
 export async function deleteAppointment(id: string) {
-  const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          try {
-            cookieStore.set({ name, value, ...options })
-          } catch (error) {
-            // Cookies can't be set in middleware
-          }
-        },
-        remove(name: string, options: any) {
-          try {
-            cookieStore.set({ name, value: "", ...options })
-          } catch (error) {
-            // Cookies can't be removed in middleware
-          }
-        },
-      },
-    },
-  )
+  try {
+    console.log(`Server: Randevu siliniyor - ID: ${id}`)
 
-  const { error } = await supabase.from("appointments").delete().eq("id", id)
+    // Doğrudan Supabase bağlantısı kullan
+    const { error } = await supabase.from("appointments").delete().eq("id", id)
 
-  if (error) {
-    console.error("Randevu silinirken hata:", error)
-    throw new Error("Randevu silinirken bir hata oluştu.")
+    if (error) {
+      console.error("Server: Randevu silinirken hata:", error)
+      throw new Error(`Randevu silinirken hata: ${error.message}`)
+    }
+
+    console.log("Server: Randevu başarıyla silindi")
+
+    // Sayfaları yenile
+    revalidatePath("/admin/appointments")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Server: Randevu silme exception:", error)
+    throw new Error(`Randevu silinirken bir hata oluştu: ${error instanceof Error ? error.message : String(error)}`)
   }
-
-  revalidatePath("/admin/appointments")
-  return { success: true }
 }
 
 export async function createAppointment(formData: FormData) {
-  console.log("Randevu oluşturma başladı")
-
-  // Admin yetkilerine sahip Supabase client kullanıyoruz
-  const supabase = createAdminSupabaseClient()
-
-  const name = formData.get("name") as string
-  const email = formData.get("email") as string
-  const phone = formData.get("phone") as string
-  const appointmentDate = formData.get("appointmentDate") as string
-  const appointmentTime = formData.get("appointmentTime") as string
-  const subject = formData.get("subject") as string
-  const message = formData.get("message") as string
-
-  console.log("Randevu verileri:", {
-    name,
-    email,
-    phone,
-    appointmentDate,
-    appointmentTime,
-    subject,
-    message,
-  })
-
-  if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
-    console.error("Eksik alanlar:", { name, email, phone, appointmentDate, appointmentTime })
-    throw new Error("Lütfen tüm zorunlu alanları doldurun.")
-  }
-
   try {
+    console.log("Server: Randevu oluşturma başladı")
+
+    const name = formData.get("name") as string
+    const email = formData.get("email") as string
+    const phone = formData.get("phone") as string
+    const appointmentDate = formData.get("appointmentDate") as string
+    const appointmentTime = formData.get("appointmentTime") as string
+    const subject = formData.get("subject") as string
+    const message = formData.get("message") as string
+
+    console.log("Server: Randevu verileri:", {
+      name,
+      email,
+      phone,
+      appointmentDate,
+      appointmentTime,
+      subject,
+      message,
+    })
+
+    if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
+      console.error("Server: Eksik alanlar:", { name, email, phone, appointmentDate, appointmentTime })
+      throw new Error("Lütfen tüm zorunlu alanları doldurun.")
+    }
+
     // Randevu oluştur
     const { data, error } = await supabase
       .from("appointments")
@@ -138,21 +111,43 @@ export async function createAppointment(formData: FormData) {
       .select()
 
     if (error) {
-      console.error("Randevu oluşturulurken hata:", error)
-      throw new Error("Randevu oluşturulurken bir hata oluştu: " + error.message)
+      console.error("Server: Randevu oluşturulurken hata:", error)
+      throw new Error(`Randevu oluşturulurken hata: ${error.message}`)
     }
 
-    console.log("Randevu başarıyla oluşturuldu:", data)
+    console.log("Server: Randevu başarıyla oluşturuldu:", data)
 
-    // Bildirim oluşturma işlemi devre dışı bırakıldı
-    // Bildirim sistemi düzgün çalıştığında tekrar etkinleştirilebilir
-
+    // Sayfaları yenile
     revalidatePath("/admin/appointments")
+
     return { success: true, data }
   } catch (error) {
-    console.error("Randevu oluşturma exception:", error)
-    throw new Error(
-      "Randevu oluşturulurken bir hata oluştu: " + (error instanceof Error ? error.message : String(error)),
-    )
+    console.error("Server: Randevu oluşturma exception:", error)
+    throw new Error(`Randevu oluşturulurken bir hata oluştu: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
+export async function getAppointmentById(id: string) {
+  try {
+    console.log(`Server: Randevu getiriliyor - ID: ${id}`)
+
+    const { data, error } = await supabase.from("appointments").select("*").eq("id", id).single()
+
+    if (error) {
+      console.error("Server: Randevu getirilirken hata:", error)
+      throw new Error(`Randevu getirilirken hata: ${error.message}`)
+    }
+
+    if (!data) {
+      console.error("Server: Randevu bulunamadı - ID:", id)
+      throw new Error("Randevu bulunamadı")
+    }
+
+    console.log("Server: Randevu başarıyla getirildi")
+
+    return data
+  } catch (error) {
+    console.error("Server: Randevu getirme exception:", error)
+    throw new Error(`Randevu getirilirken bir hata oluştu: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
