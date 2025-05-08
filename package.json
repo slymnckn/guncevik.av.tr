@@ -62,6 +62,11 @@
     "@tanstack/react-query": "latest",
     "slate": "latest",
     "slate-dom": "latest",
+    "@remix-run/react": "latest",
+    "@sveltejs/kit": "latest",
+    "svelte": "latest",
+    "vue": "latest",
+    "vue-router": "latest",
     "@tailwindcss/typography": "latest",
     "@supabase/auth-helpers-nextjs": "latest",
     "@tanstack/react-query-devtools": "latest",
@@ -69,7 +74,8 @@
     "@upstash/redis": "latest",
     "crypto": "latest",
     "slate-react": "latest",
-    "slate-history": "latest"
+    "slate-history": "latest",
+    "@vercel/analytics": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

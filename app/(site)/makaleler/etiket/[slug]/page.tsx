@@ -1,7 +1,6 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
-import { SiteWrapper } from "@/components/site-wrapper"
 import { BlogSidebar } from "@/components/blog-sidebar"
 import { BlogCard } from "@/components/blog-card"
 import { getPopularBlogPosts } from "@/actions/public-actions"
@@ -81,32 +80,30 @@ export default async function BlogTagPage({ params }: { params: { slug: string }
     const { data: popularPosts } = await getPopularBlogPosts(5)
 
     return (
-      <SiteWrapper>
-        <div className="container py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">"{tag.name}" Etiketli Makaleler</h1>
-                {tag.description && <p className="text-gray-600">{tag.description}</p>}
-              </div>
-
-              <div className="grid grid-cols-1 gap-6">
-                {posts.length > 0 ? (
-                  posts.map((post) => <BlogCard key={post.id} post={post} />)
-                ) : (
-                  <div className="text-center py-12 bg-white rounded-lg shadow">
-                    <p className="text-gray-500">Bu etiketle ilgili henüz makale bulunmamaktadır.</p>
-                  </div>
-                )}
-              </div>
+      <div className="container py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">"{tag.name}" Etiketli Makaleler</h1>
+              {tag.description && <p className="text-gray-600">{tag.description}</p>}
             </div>
 
-            <div className="lg:w-full">
-              <BlogSidebar categories={categories || []} popularPosts={popularPosts || []} />
+            <div className="grid grid-cols-1 gap-6">
+              {posts.length > 0 ? (
+                posts.map((post) => <BlogCard key={post.id} post={post} />)
+              ) : (
+                <div className="text-center py-12 bg-white rounded-lg shadow">
+                  <p className="text-gray-500">Bu etiketle ilgili henüz makale bulunmamaktadır.</p>
+                </div>
+              )}
             </div>
           </div>
+
+          <div className="lg:w-full">
+            <BlogSidebar categories={categories || []} popularPosts={popularPosts || []} />
+          </div>
         </div>
-      </SiteWrapper>
+      </div>
     )
   } catch (error) {
     console.error("Etiket sayfası yüklenirken hata oluştu:", error)

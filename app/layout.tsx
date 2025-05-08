@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { Suspense } from "react"
 import { SpeedInsights } from "@/components/analytics/speed-insights"
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -47,10 +48,10 @@ export default function RootLayout({
         <ErrorBoundary>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <Suspense fallback={`Loading ...`}>{children}</Suspense>
-            {/* Analytics Provider domain geçişinden sonra eklenecek */}
           </ThemeProvider>
         </ErrorBoundary>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )
