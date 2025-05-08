@@ -4,8 +4,6 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { Suspense } from "react"
-import { SpeedInsights } from "@/components/analytics/speed-insights"
-import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -50,8 +48,6 @@ export default function RootLayout({
             <Suspense fallback={`Loading ...`}>{children}</Suspense>
           </ThemeProvider>
         </ErrorBoundary>
-        <SpeedInsights />
-        <Analytics />
       </body>
     </html>
   )
