@@ -17,6 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { useState } from "react"
+import LogoutModal from "./logout-modal"
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -36,7 +37,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="h-full py-4">
+    <div className="h-full py-4 flex flex-col">
       <div className="px-4 mb-6">
         <Link href="/admin/dashboard">
           <div className="flex items-center space-x-2">
@@ -48,7 +49,7 @@ export default function Sidebar() {
         </Link>
       </div>
 
-      <nav className="space-y-1 px-2">
+      <nav className="space-y-1 px-2 flex-1">
         <Link
           href="/admin/dashboard"
           className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
@@ -213,6 +214,11 @@ export default function Sidebar() {
           <span>Ayarlar</span>
         </Link>
       </nav>
+
+      {/* Çıkış Yap Butonu - Sidebar'ın alt kısmında */}
+      <div className="mt-auto px-2 pt-4 border-t border-gray-200">
+        <LogoutModal />
+      </div>
     </div>
   )
 }
