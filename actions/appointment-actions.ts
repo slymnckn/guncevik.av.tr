@@ -1,11 +1,38 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
+import { createServerClient } from "@supabase/ssr"
 import { revalidatePath } from "next/cache"
+import type { Database } from "@/lib/types/database"
+import { createAdminSupabaseClient } from "@/lib/supabase/server"
 
 export async function updateAppointmentStatus(id: string, status: string, notes?: string) {
-  const supabase = createServerActionClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can't be set in middleware
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: "", ...options })
+          } catch (error) {
+            // Cookies can't be removed in middleware
+          }
+        },
+      },
+    },
+  )
 
   const { error } = await supabase
     .from("appointments")
@@ -27,7 +54,32 @@ export async function updateAppointmentStatus(id: string, status: string, notes?
 }
 
 export async function deleteAppointment(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can't be set in middleware
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: "", ...options })
+          } catch (error) {
+            // Cookies can't be removed in middleware
+          }
+        },
+      },
+    },
+  )
 
   const { error } = await supabase.from("appointments").delete().eq("id", id)
 
@@ -42,7 +94,9 @@ export async function deleteAppointment(id: string) {
 
 export async function createAppointment(formData: FormData) {
   console.log("Randevu oluşturma başladı")
-  const supabase = createServerActionClient({ cookies })
+
+  // Admin yetkilerine sahip Supabase client kullanıyoruz
+  const supabase = createAdminSupabaseClient()
 
   const name = formData.get("name") as string
   const email = formData.get("email") as string
@@ -67,26 +121,38 @@ export async function createAppointment(formData: FormData) {
     throw new Error("Lütfen tüm zorunlu alanları doldurun.")
   }
 
-  const { data, error } = await supabase
-    .from("appointments")
-    .insert({
-      name,
-      email,
-      phone,
-      appointment_date: appointmentDate,
-      appointment_time: appointmentTime,
-      subject,
-      message,
-      status: "pending",
-    })
-    .select()
+  try {
+    // Randevu oluştur
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert({
+        name,
+        email,
+        phone,
+        appointment_date: appointmentDate,
+        appointment_time: appointmentTime,
+        subject,
+        message,
+        status: "pending",
+      })
+      .select()
 
-  if (error) {
-    console.error("Randevu oluşturulurken hata:", error)
-    throw new Error("Randevu oluşturulurken bir hata oluştu: " + error.message)
+    if (error) {
+      console.error("Randevu oluşturulurken hata:", error)
+      throw new Error("Randevu oluşturulurken bir hata oluştu: " + error.message)
+    }
+
+    console.log("Randevu başarıyla oluşturuldu:", data)
+
+    // Bildirim oluşturma işlemi devre dışı bırakıldı
+    // Bildirim sistemi düzgün çalıştığında tekrar etkinleştirilebilir
+
+    revalidatePath("/admin/appointments")
+    return { success: true, data }
+  } catch (error) {
+    console.error("Randevu oluşturma exception:", error)
+    throw new Error(
+      "Randevu oluşturulurken bir hata oluştu: " + (error instanceof Error ? error.message : String(error)),
+    )
   }
-
-  console.log("Randevu başarıyla oluşturuldu:", data)
-  revalidatePath("/admin/appointments")
-  return { success: true, data }
 }

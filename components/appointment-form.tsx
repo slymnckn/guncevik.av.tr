@@ -1,59 +1,87 @@
 "use client"
 
-import { useState } from "react"
-import { createAppointment } from "@/actions/appointment-actions"
+import type React from "react"
+
+import { useState, type FormEvent } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2 } from "lucide-react"
 
 export function AppointmentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formStatus, setFormStatus] = useState<{
-    success?: boolean
-    message?: string
-  }>({})
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    appointmentDate: "",
+    appointmentTime: "",
+    subject: "",
+    message: "",
+  })
 
-  async function handleSubmit(formData: FormData) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+
     try {
-      setIsSubmitting(true)
-      console.log("Randevu formu gönderiliyor...")
-
       // Form verilerini kontrol et
-      const name = formData.get("name") as string
-      const email = formData.get("email") as string
-      const phone = formData.get("phone") as string
-      const appointmentDate = formData.get("appointmentDate") as string
-      const appointmentTime = formData.get("appointmentTime") as string
-
-      console.log("Form verileri:", { name, email, phone, appointmentDate, appointmentTime })
-
-      if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
-        setFormStatus({
-          success: false,
-          message: "Lütfen tüm zorunlu alanları doldurun.",
-        })
-        return
+      if (
+        !formData.name ||
+        !formData.email ||
+        !formData.phone ||
+        !formData.appointmentDate ||
+        !formData.appointmentTime
+      ) {
+        throw new Error("Lütfen tüm zorunlu alanları doldurun.")
       }
 
-      const result = await createAppointment(formData)
-
-      if (result.success) {
-        setFormStatus({
-          success: true,
-          message: "Randevu talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.",
-        })
-        // Formu sıfırla
-        const form = document.getElementById("appointment-form") as HTMLFormElement
-        form?.reset()
-      } else {
-        setFormStatus({
-          success: false,
-          message: "Randevu oluşturulurken bir hata oluştu.",
-        })
-      }
-    } catch (error) {
-      console.error("Randevu oluşturma hatası:", error)
-      setFormStatus({
-        success: false,
-        message: error instanceof Error ? error.message : "Randevu oluşturulurken bir hata oluştu.",
+      const response = await fetch("/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Randevu oluşturulurken bir hata oluştu.")
+      }
+
+      setSuccess(true)
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        appointmentDate: "",
+        appointmentTime: "",
+        subject: "",
+        message: "",
+      })
+
+      // 5 saniye sonra başarı mesajını kaldır
+      setTimeout(() => {
+        setSuccess(false)
+      }, 5000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Randevu oluşturulurken bir hata oluştu.")
     } finally {
       setIsSubmitting(false)
     }
@@ -61,133 +89,133 @@ export function AppointmentForm() {
 
   const today = new Date().toISOString().split("T")[0]
 
+  const availableTimes = [
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+    "17:00",
+  ]
+
   return (
-    <form id="appointment-form" action={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            İsim Soyisim *
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-          />
+    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Randevu Talebi</h2>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="name">Ad Soyad *</Label>
+          <Input id="name" name="name" value={formData.name} onChange={handleChange} required placeholder="Ad Soyad" />
         </div>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            E-posta *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="email">E-posta *</Label>
+          <Input
             id="email"
             name="email"
             type="email"
+            value={formData.email}
+            onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="E-posta"
           />
         </div>
 
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-            Telefon *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="phone">Telefon *</Label>
+          <Input
             id="phone"
             name="phone"
-            type="tel"
+            value={formData.phone}
+            onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Telefon"
           />
         </div>
 
-        <div>
-          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-            Konu
-          </label>
-          <input
-            id="subject"
-            name="subject"
-            type="text"
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 mb-1">
-            Randevu Tarihi *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="appointmentDate">Randevu Tarihi *</Label>
+          <Input
             id="appointmentDate"
             name="appointmentDate"
             type="date"
             min={today}
+            value={formData.appointmentDate}
+            onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
 
-        <div>
-          <label htmlFor="appointmentTime" className="block text-sm font-medium text-gray-700 mb-1">
-            Randevu Saati *
-          </label>
-          <select
-            id="appointmentTime"
-            name="appointmentTime"
-            required
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+        <div className="space-y-2">
+          <Label htmlFor="appointmentTime">Randevu Saati *</Label>
+          <Select
+            value={formData.appointmentTime}
+            onValueChange={(value) => handleSelectChange("appointmentTime", value)}
           >
-            <option value="">Saat Seçin</option>
-            <option value="09:00">09:00</option>
-            <option value="09:30">09:30</option>
-            <option value="10:00">10:00</option>
-            <option value="10:30">10:30</option>
-            <option value="11:00">11:00</option>
-            <option value="11:30">11:30</option>
-            <option value="13:00">13:00</option>
-            <option value="13:30">13:30</option>
-            <option value="14:00">14:00</option>
-            <option value="14:30">14:30</option>
-            <option value="15:00">15:00</option>
-            <option value="15:30">15:30</option>
-            <option value="16:00">16:00</option>
-            <option value="16:30">16:30</option>
-            <option value="17:00">17:00</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Saat seçin" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTimes.map((time) => (
+                <SelectItem key={time} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="subject">Konu</Label>
+          <Input id="subject" name="subject" value={formData.subject} onChange={handleChange} placeholder="Konu" />
         </div>
       </div>
 
-      <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-          Mesajınız
-        </label>
-        <textarea
+      <div className="space-y-2">
+        <Label htmlFor="message">Mesaj</Label>
+        <Textarea
           id="message"
           name="message"
+          value={formData.message}
+          onChange={handleChange}
+          placeholder="Mesajınız"
           rows={4}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-        ></textarea>
+        />
       </div>
 
-      {formStatus.message && (
-        <div
-          className={`p-3 rounded-md ${formStatus.success ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}
-        >
-          {formStatus.message}
-        </div>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gönderiliyor...
+          </>
+        ) : (
+          "Randevu Talep Et"
+        )}
+      </Button>
+
+      {/* Başarı mesajını formun altına taşıdık */}
+      {success && (
+        <Alert className="mt-4">
+          <AlertDescription>
+            Randevu talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.
+          </AlertDescription>
+        </Alert>
       )}
-
-      <div>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-75"
-        >
-          {isSubmitting ? "Gönderiliyor..." : "Randevu Oluştur"}
-        </button>
-      </div>
     </form>
   )
 }
