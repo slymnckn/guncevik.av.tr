@@ -1,36 +1,81 @@
+import { Suspense } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { PlusCircle } from "lucide-react"
+import Link from "next/link"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getUsers } from "@/actions/user-actions"
-import { UserList } from "@/components/admin/users/user-list"
-import { NewUserForm } from "@/components/admin/users/new-user-form"
+import UsersClientPage from "./UsersClientPage"
+
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 export default async function UsersPage() {
-  // Hata yakalama ile kullanıcıları getir
-  let users = []
-  let error = null
-
-  try {
-    users = await getUsers()
-  } catch (err: any) {
-    console.error("Kullanıcılar getirilirken hata:", err)
-    error = err.message || "Kullanıcılar getirilirken bir hata oluştu."
-  }
+  const { users, error } = (await getUsers()) || { users: [], error: null }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Kullanıcılar</h1>
-        <p className="text-muted-foreground">Kullanıcıları yönetin ve yeni kullanıcılar ekleyin.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Kullanıcılar</h1>
+          <p className="text-muted-foreground">Sistem kullanıcılarını yönetin</p>
+        </div>
+        <Link href="/admin/users/new">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Yeni Kullanıcı
+          </Button>
+        </Link>
       </div>
 
-      <NewUserForm />
+      <Card>
+        <CardHeader>
+          <CardTitle>Kullanıcılar</CardTitle>
+          <CardDescription>Tüm sistem kullanıcıları</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<UsersTableSkeleton />}>
+            <UsersClientPage users={users} />
+          </Suspense>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
-      {error ? (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-          <p className="font-medium">Hata</p>
-          <p>{error}</p>
+function UsersTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-9 w-9" />
+        <Skeleton className="h-9 w-[250px]" />
+      </div>
+      <div className="rounded-md border">
+        <div className="h-12 border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-[250px]" />
+          </div>
         </div>
-      ) : (
-        <UserList users={users} />
-      )}
+        {Array(5)
+          .fill(null)
+          .map((_, i) => (
+            <div key={i} className="h-16 border-b px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[200px]" />
+                    <Skeleton className="h-4 w-[150px]" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 w-9" />
+                  <Skeleton className="h-9 w-9" />
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
     </div>
   )
 }

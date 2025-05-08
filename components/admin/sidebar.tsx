@@ -1,259 +1,128 @@
 "use client"
 
+import type React from "react"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  BarChart3,
-  Calendar,
-  FileText,
-  Home,
-  Mail,
-  Settings,
-  Users,
-  Bell,
-  Database,
-  BriefcaseBusiness,
-  ChevronDown,
-  ChevronRight,
-  LogOut,
-  Palette,
-  User,
-} from "lucide-react"
+import { FileText, LayoutDashboard, MessageSquare, Settings, Users, Calendar, Palette, LogOut } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { LogoutModal } from "./logout-modal"
 import { useState } from "react"
-import LogoutModal from "./logout-modal"
 
-export default function Sidebar() {
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    blog: false, // Blog menüsü varsayılan olarak kapalı
-  })
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
-  const toggleMenu = (menu: string) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [menu]: !prev[menu],
-    }))
-  }
-
-  const isActive = (path: string) => {
-    return pathname === path || pathname?.startsWith(`${path}/`)
-  }
-
   return (
-    <div className="h-full py-4 flex flex-col">
-      <div className="px-4 mb-6">
-        <Link href="/admin/dashboard">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white font-bold">
-              GÇ
-            </div>
-            <span className="text-lg font-semibold">Admin Panel</span>
-          </div>
+    <div className={cn("flex flex-col h-screen border-r bg-background", className)}>
+      <div className="p-6">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <span className="text-xl font-bold">Günçevik</span>
         </Link>
       </div>
-
-      <nav className="space-y-1 px-2 flex-1">
-        <Link
-          href="/admin/dashboard"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/dashboard") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Home className="h-5 w-5" />
-          <span>Dashboard</span>
-        </Link>
-
-        <Link
-          href="/admin/messages"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/messages") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Mail className="h-5 w-5" />
-          <span>Mesajlar</span>
-        </Link>
-
-        <Link
-          href="/admin/appointments"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/appointments")
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Calendar className="h-5 w-5" />
-          <span>Randevular</span>
-        </Link>
-
-        <Link
-          href="/admin/services"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/services") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <BriefcaseBusiness className="h-5 w-5" />
-          <span>Hizmetler</span>
-        </Link>
-
-        <div className="py-1">
-          <button
-            onClick={() => toggleMenu("blog")}
-            className={`flex items-center justify-between w-full px-3 py-2 rounded-md transition-colors ${
-              isActive("/admin/blog") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-            }`}
+      <ScrollArea className="flex-1 px-4">
+        <div className="flex flex-col gap-1">
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin"
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
           >
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5" />
-              <span>Blog</span>
-            </div>
-            {openMenus.blog ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </button>
-
-          {openMenus.blog && (
-            <div className="mt-1 ml-6 space-y-1">
-              <Link
-                href="/admin/blog"
-                className={`block px-3 py-2 text-sm rounded-md ${
-                  pathname === "/admin/blog"
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Tüm Yazılar
-              </Link>
-              <Link
-                href="/admin/blog/new"
-                className={`block px-3 py-2 text-sm rounded-md ${
-                  pathname === "/admin/blog/new"
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Yeni Yazı
-              </Link>
-              <Link
-                href="/admin/blog/categories"
-                className={`block px-3 py-2 text-sm rounded-md ${
-                  isActive("/admin/blog/categories")
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Kategoriler
-              </Link>
-              <Link
-                href="/admin/blog/tags"
-                className={`block px-3 py-2 text-sm rounded-md ${
-                  isActive("/admin/blog/tags")
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Etiketler
-              </Link>
-              <Link
-                href="/admin/blog/comments"
-                className={`block px-3 py-2 text-sm rounded-md ${
-                  isActive("/admin/blog/comments")
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                Yorumlar
-              </Link>
-            </div>
-          )}
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
+          <Link
+            href="/admin/appointments"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin/appointments" || pathname.startsWith("/admin/appointments/")
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Calendar className="h-4 w-4" />
+            Randevular
+          </Link>
+          <Link
+            href="/admin/blog"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin/blog" || pathname.startsWith("/admin/blog/")
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <FileText className="h-4 w-4" />
+            Blog
+          </Link>
+          <Link
+            href="/admin/messages"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin/messages" || pathname.startsWith("/admin/messages/")
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <MessageSquare className="h-4 w-4" />
+            Mesajlar
+          </Link>
+          <Link
+            href="/admin/users"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin/users" || pathname.startsWith("/admin/users/")
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Users className="h-4 w-4" />
+            Kullanıcılar
+          </Link>
+          <Link
+            href="/admin/site-settings"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin/site-settings"
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Palette className="h-4 w-4" />
+            Site Ayarları
+          </Link>
+          <Link
+            href="/admin/settings"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname === "/admin/settings"
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Settings className="h-4 w-4" />
+            Ayarlar
+          </Link>
         </div>
+      </ScrollArea>
 
-        <Link
-          href="/admin/users"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/users") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Users className="h-5 w-5" />
-          <span>Kullanıcılar</span>
-        </Link>
-
-        <Link
-          href="/admin/profile"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/profile") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <User className="h-5 w-5" />
-          <span>Profil</span>
-        </Link>
-
-        <Link
-          href="/admin/reports"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/reports") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <BarChart3 className="h-5 w-5" />
-          <span>Raporlar</span>
-        </Link>
-
-        <Link
-          href="/admin/notifications"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/notifications")
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Bell className="h-5 w-5" />
-          <span>Bildirimler</span>
-        </Link>
-
-        <Link
-          href="/admin/database"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/database") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Database className="h-5 w-5" />
-          <span>Veritabanı</span>
-        </Link>
-
-        <Link
-          href="/admin/site-settings"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/site-settings")
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Palette className="h-5 w-5" />
-          <span>Site Ayarları</span>
-        </Link>
-
-        <Link
-          href="/admin/settings"
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-            isActive("/admin/settings") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Settings className="h-5 w-5" />
-          <span>Ayarlar</span>
-        </Link>
-      </nav>
-
-      {/* Çıkış Yap Butonu - Sidebar'ın alt kısmında */}
-      <div className="mt-auto px-2 pt-4 border-t border-gray-200">
-        <button
-          onClick={() => setShowLogoutModal(true)}
-          className="flex items-center space-x-2 w-full px-3 py-2 rounded-md transition-colors text-red-600 hover:bg-red-50"
-        >
-          <LogOut className="h-5 w-5" />
-          <span>Çıkış Yap</span>
-        </button>
+      <div className="border-t p-4">
+        <Button variant="destructive" className="w-full justify-start" onClick={() => setShowLogoutModal(true)}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Çıkış Yap
+        </Button>
       </div>
 
-      {/* Çıkış Yap Modal */}
-      {showLogoutModal && <LogoutModal open={showLogoutModal} onOpenChange={setShowLogoutModal} />}
+      <LogoutModal open={showLogoutModal} onOpenChange={setShowLogoutModal} />
     </div>
   )
 }
+
+export default Sidebar
