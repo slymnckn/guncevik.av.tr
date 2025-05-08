@@ -1,21 +1,132 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, Calendar, FileText, Users, ArrowRight, TrendingUp, Eye, Clock } from "lucide-react"
-import Link from "next/link"
-import { getDashboardData } from "@/actions/dashboard-actions"
-import { formatDistanceToNow } from "date-fns"
-import { tr } from "date-fns/locale"
-import { StatusBadge } from "@/lib/utils/status-helpers"
+"use client"
 
-export default async function DashboardPage() {
-  const { stats, recentContacts, recentAppointments, recentActivities } = await getDashboardData()
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { MessageSquare, Calendar, FileText, Users, ArrowRight, Eye, Clock, ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+
+// Örnek veri - gerçek uygulamada API'den gelecek
+const analyticsData = {
+  pageViews: {
+    total: 1234,
+    change: 12,
+    data: [
+      { date: "1 May", value: 400 },
+      { date: "2 May", value: 300 },
+      { date: "3 May", value: 500 },
+      { date: "4 May", value: 350 },
+      { date: "5 May", value: 450 },
+      { date: "6 May", value: 500 },
+      { date: "7 May", value: 550 },
+      { date: "8 May", value: 600 },
+    ],
+  },
+  visitors: {
+    total: 567,
+    change: 8,
+    data: [
+      { date: "1 May", value: 200 },
+      { date: "2 May", value: 150 },
+      { date: "3 May", value: 300 },
+      { date: "4 May", value: 200 },
+      { date: "5 May", value: 250 },
+      { date: "6 May", value: 300 },
+      { date: "7 May", value: 350 },
+      { date: "8 May", value: 400 },
+    ],
+  },
+  bounceRate: {
+    total: 42.5,
+    change: -2.3,
+    data: [
+      { date: "1 May", value: 45 },
+      { date: "2 May", value: 48 },
+      { date: "3 May", value: 47 },
+      { date: "4 May", value: 44 },
+      { date: "5 May", value: 45 },
+      { date: "6 May", value: 43 },
+      { date: "7 May", value: 42 },
+      { date: "8 May", value: 40 },
+    ],
+  },
+  sessionDuration: {
+    total: 3.7,
+    change: 8,
+    data: [
+      { date: "1 May", value: 3.2 },
+      { date: "2 May", value: 3.0 },
+      { date: "3 May", value: 3.5 },
+      { date: "4 May", value: 3.3 },
+      { date: "5 May", value: 3.6 },
+      { date: "6 May", value: 3.8 },
+      { date: "7 May", value: 3.9 },
+      { date: "8 May", value: 4.0 },
+    ],
+  },
+}
+
+// Örnek site istatistikleri - gerçek uygulamada API'den gelecek
+const siteStats = {
+  totalMessages: 5,
+  newMessages: 5,
+  totalAppointments: 5,
+  newAppointments: 2,
+  totalBlogPosts: 8,
+  newBlogPosts: 8,
+  totalUsers: 3,
+  newUsers: 3,
+}
+
+export default function DashboardPage() {
+  const [timeRange, setTimeRange] = useState("week")
+  const [stats, setStats] = useState(siteStats)
+  const [analytics, setAnalytics] = useState(analyticsData)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Zaman aralığı değiştiğinde verileri güncelle
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        // Gerçek uygulamada burada API çağrısı yapılacak
+        // const response = await fetch(`/api/analytics?timeRange=${timeRange}`)
+        // const data = await response.json()
+        // setAnalytics(data)
+
+        // Şimdilik sadece yükleme efekti gösteriyoruz
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        setIsLoading(false)
+      } catch (error) {
+        console.error("Analytics verisi yüklenirken hata:", error)
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [timeRange])
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Hoş geldiniz! İşte bugünkü istatistikleriniz.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">Hoş geldiniz! İşte site istatistikleriniz.</p>
+        </div>
+        <Select value={timeRange} onValueChange={setTimeRange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Zaman Aralığı" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="day">Bugün</SelectItem>
+            <SelectItem value="week">Bu Hafta</SelectItem>
+            <SelectItem value="month">Bu Ay</SelectItem>
+            <SelectItem value="year">Bu Yıl</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -25,8 +136,8 @@ export default async function DashboardPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalContacts}</div>
-            <p className="text-xs text-muted-foreground">+{stats.newContacts} yeni mesaj</p>
+            <div className="text-2xl font-bold">{stats.totalMessages}</div>
+            <p className="text-xs text-muted-foreground">+{stats.newMessages} yeni mesaj</p>
           </CardContent>
         </Card>
         <Card>
@@ -61,155 +172,261 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs defaultValue="analytics">
         <TabsList>
-          <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
           <TabsTrigger value="analytics">Analitik</TabsTrigger>
+          <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Son Aktiviteler</CardTitle>
-              <CardDescription>Son aktiviteler</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-center">
-                    <div className="mr-4 rounded-full bg-primary/10 p-2">
-                      {activity.type === "contact" && <MessageSquare className="h-4 w-4 text-primary" />}
-                      {activity.type === "appointment" && <Calendar className="h-4 w-4 text-primary" />}
-                      {activity.type === "blog" && <FileText className="h-4 w-4 text-primary" />}
-                      {activity.type === "user" && <Users className="h-4 w-4 text-primary" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{activity.title}</p>
-                      <p className="text-xs text-muted-foreground">{activity.description}</p>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true, locale: tr })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 flex justify-center">
-                <Link href="/admin/reports">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    Tüm Aktiviteleri Gör
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Son İletişim Mesajları */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Son İletişim Mesajları</CardTitle>
-                <CardDescription>Son gelen iletişim mesajları</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentContacts.map((contact) => (
-                    <div key={contact.id} className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{contact.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{contact.subject}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(contact.created_at), { addSuffix: true, locale: tr })}
-                        </p>
-                      </div>
-                      <StatusBadge status={contact.status} />
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex justify-center">
-                  <Link href="/admin/messages">
-                    <Button variant="outline" size="sm" className="gap-1">
-                      Tüm Mesajları Gör
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Son Randevular */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Son Randevular</CardTitle>
-                <CardDescription>Son gelen randevu talepleri</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentAppointments.map((appointment) => (
-                    <div key={appointment.id} className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{appointment.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{appointment.subject}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(appointment.created_at), { addSuffix: true, locale: tr })}
-                        </p>
-                      </div>
-                      <StatusBadge status={appointment.status} type="appointment" />
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex justify-center">
-                  <Link href="/admin/appointments">
-                    <Button variant="outline" size="sm" className="gap-1">
-                      Tüm Randevuları Gör
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
         <TabsContent value="analytics" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Sayfa Görüntülenmeleri */}
+            <Card className={isLoading ? "opacity-60" : ""}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Sayfa Görüntülenmeleri</CardTitle>
                 <Eye className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">1,234</div>
-                <p className="text-xs text-muted-foreground">+12% geçen haftaya göre</p>
+                <div className="text-2xl font-bold">{analytics.pageViews.total.toLocaleString()}</div>
+                <div className="flex items-center mt-1">
+                  <span className={`text-xs ${analytics.pageViews.change > 0 ? "text-green-500" : "text-red-500"}`}>
+                    {analytics.pageViews.change > 0 ? "+" : ""}
+                    {analytics.pageViews.change}%
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    geçen{" "}
+                    {timeRange === "day"
+                      ? "güne"
+                      : timeRange === "week"
+                        ? "haftaya"
+                        : timeRange === "month"
+                          ? "aya"
+                          : "yıla"}{" "}
+                    göre
+                  </span>
+                </div>
+
+                <div className="h-[80px] mt-3">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analytics.pageViews.data}>
+                      <XAxis dataKey="date" hide />
+                      <YAxis hide />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-background border rounded-md shadow-sm p-2 text-xs">
+                                <p className="font-medium">{payload[0].payload.date}</p>
+                                <p>{payload[0].value.toLocaleString()} görüntülenme</p>
+                              </div>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#0ea5e9"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 0 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
-            <Card>
+
+            {/* Ziyaretçiler */}
+            <Card className={isLoading ? "opacity-60" : ""}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Ziyaretçiler</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.visitors.total.toLocaleString()}</div>
+                <div className="flex items-center mt-1">
+                  <span className={`text-xs ${analytics.visitors.change > 0 ? "text-green-500" : "text-red-500"}`}>
+                    {analytics.visitors.change > 0 ? "+" : ""}
+                    {analytics.visitors.change}%
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    geçen{" "}
+                    {timeRange === "day"
+                      ? "güne"
+                      : timeRange === "week"
+                        ? "haftaya"
+                        : timeRange === "month"
+                          ? "aya"
+                          : "yıla"}{" "}
+                    göre
+                  </span>
+                </div>
+
+                <div className="h-[80px] mt-3">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analytics.visitors.data}>
+                      <XAxis dataKey="date" hide />
+                      <YAxis hide />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-background border rounded-md shadow-sm p-2 text-xs">
+                                <p className="font-medium">{payload[0].payload.date}</p>
+                                <p>{payload[0].value.toLocaleString()} ziyaretçi</p>
+                              </div>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#10b981"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 0 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Hemen Çıkma Oranı */}
+            <Card className={isLoading ? "opacity-60" : ""}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Hemen Çıkma Oranı</CardTitle>
+                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.bounceRate.total}%</div>
+                <div className="flex items-center mt-1">
+                  <span className={`text-xs ${analytics.bounceRate.change < 0 ? "text-green-500" : "text-red-500"}`}>
+                    {analytics.bounceRate.change > 0 ? "+" : ""}
+                    {analytics.bounceRate.change}%
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    geçen{" "}
+                    {timeRange === "day"
+                      ? "güne"
+                      : timeRange === "week"
+                        ? "haftaya"
+                        : timeRange === "month"
+                          ? "aya"
+                          : "yıla"}{" "}
+                    göre
+                  </span>
+                </div>
+
+                <div className="h-[80px] mt-3">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analytics.bounceRate.data}>
+                      <XAxis dataKey="date" hide />
+                      <YAxis hide />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-background border rounded-md shadow-sm p-2 text-xs">
+                                <p className="font-medium">{payload[0].payload.date}</p>
+                                <p>{payload[0].value}% hemen çıkma oranı</p>
+                              </div>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#f43f5e"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 0 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ortalama Oturum Süresi */}
+            <Card className={isLoading ? "opacity-60" : ""}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Ortalama Oturum Süresi</CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">3m 42s</div>
-                <p className="text-xs text-muted-foreground">+8% geçen haftaya göre</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Dönüşüm Oranı</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3.2%</div>
-                <p className="text-xs text-muted-foreground">+0.5% geçen haftaya göre</p>
+                <div className="text-2xl font-bold">{analytics.sessionDuration.total} dk</div>
+                <div className="flex items-center mt-1">
+                  <span
+                    className={`text-xs ${analytics.sessionDuration.change > 0 ? "text-green-500" : "text-red-500"}`}
+                  >
+                    {analytics.sessionDuration.change > 0 ? "+" : ""}
+                    {analytics.sessionDuration.change}%
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    geçen{" "}
+                    {timeRange === "day"
+                      ? "güne"
+                      : timeRange === "week"
+                        ? "haftaya"
+                        : timeRange === "month"
+                          ? "aya"
+                          : "yıla"}{" "}
+                    göre
+                  </span>
+                </div>
+
+                <div className="h-[80px] mt-3">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analytics.sessionDuration.data}>
+                      <XAxis dataKey="date" hide />
+                      <YAxis hide />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-background border rounded-md shadow-sm p-2 text-xs">
+                                <p className="font-medium">{payload[0].payload.date}</p>
+                                <p>{payload[0].value} dk ortalama süre</p>
+                              </div>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#8b5cf6"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 0 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
+
           <div className="mt-4 flex justify-center">
-            <Link href="/admin/reports">
+            <Link href="/admin/analytics">
               <Button variant="outline" size="sm" className="gap-1">
                 Detaylı Analitik Raporları
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
+        </TabsContent>
+
+        <TabsContent value="overview" className="space-y-4">
+          {/* Genel bakış içeriği buraya gelecek */}
         </TabsContent>
       </Tabs>
     </div>

@@ -2,7 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Calendar, FileText, Home, Mail, BriefcaseBusiness, ChevronDown, ChevronRight, LogOut } from "lucide-react"
+import {
+  Calendar,
+  FileText,
+  Home,
+  Mail,
+  BriefcaseBusiness,
+  ChevronDown,
+  ChevronRight,
+  LogOut,
+  BarChart,
+} from "lucide-react"
 import { useState } from "react"
 import LogoutModal from "./logout-modal"
 
@@ -46,6 +56,16 @@ export default function Sidebar() {
         >
           <Home className="h-5 w-5" />
           <span>Dashboard</span>
+        </Link>
+
+        <Link
+          href="/admin/analytics"
+          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
+            isActive("/admin/analytics") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          <BarChart className="h-5 w-5" />
+          <span>Analitik</span>
         </Link>
 
         <Link
