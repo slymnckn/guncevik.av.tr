@@ -6,7 +6,8 @@ import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import Sidebar from "@/components/admin/sidebar"
-import { Loader2 } from "lucide-react"
+import { Loader2, Menu } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function AdminDashboardLayout({
   children,
@@ -17,7 +18,30 @@ export default function AdminDashboardLayout({
   const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const supabase = createClientComponentClient()
+
+  // Ekran genişliğini takip etmek için
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+      // Masaüstü genişliğinde sidebar'ı otomatik aç
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(true)
+      } else {
+        setSidebarOpen(false)
+      }
+    }
+
+    // İlk yükleme
+    checkMobile()
+
+    // Ekran boyutu değiştiğinde kontrol et
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   useEffect(() => {
     setIsMounted(true)
@@ -66,6 +90,13 @@ export default function AdminDashboardLayout({
     }
   }, [router, pathname, supabase])
 
+  // Mobil cihazlarda sidebar'ı kapatmak için
+  const closeSidebar = () => {
+    if (isMobile) {
+      setSidebarOpen(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -75,11 +106,44 @@ export default function AdminDashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-64 h-screen fixed left-0 top-0 overflow-y-auto bg-white border-r border-gray-200">
-        <Sidebar />
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+      {/* Mobil menü butonu */}
+      <div className="lg:hidden flex items-center p-4 border-b bg-white">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label={sidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+        <div className="ml-4 font-semibold">Admin Panel</div>
       </div>
-      <div className="ml-64 flex-1 p-6 overflow-auto">{children}</div>
+
+      {/* Sidebar */}
+      <div
+        className={`
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+          lg:translate-x-0
+          fixed lg:sticky top-0 left-0 z-40 h-screen w-64 
+          transition-transform duration-300 ease-in-out
+          bg-white border-r border-gray-200 overflow-y-auto
+        `}
+      >
+        <Sidebar onLinkClick={closeSidebar} />
+      </div>
+
+      {/* Overlay - Mobil görünümde sidebar açıkken arka planı karartır */}
+      {sidebarOpen && isMobile && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Ana içerik */}
+      <div className={`flex-1 p-4 lg:p-6 ${sidebarOpen && isMobile ? "blur-sm" : ""} lg:ml-0`}>{children}</div>
     </div>
   )
 }

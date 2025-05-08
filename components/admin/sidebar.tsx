@@ -2,11 +2,16 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Calendar, FileText, Home, Mail, BriefcaseBusiness, ChevronDown, ChevronRight, LogOut } from "lucide-react"
+import { Calendar, FileText, Home, Mail, BriefcaseBusiness, ChevronDown, ChevronRight, LogOut, X } from "lucide-react"
 import { useState } from "react"
 import LogoutModal from "./logout-modal"
+import { Button } from "@/components/ui/button"
 
-export default function Sidebar() {
+interface SidebarProps {
+  onLinkClick?: () => void
+}
+
+export default function Sidebar({ onLinkClick }: SidebarProps) {
   const pathname = usePathname()
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     blog: false, // Blog menüsü varsayılan olarak kapalı
@@ -24,10 +29,16 @@ export default function Sidebar() {
     return pathname === path || pathname?.startsWith(`${path}/`)
   }
 
+  const handleLinkClick = () => {
+    if (onLinkClick) {
+      onLinkClick()
+    }
+  }
+
   return (
     <div className="h-full py-4 flex flex-col">
-      <div className="px-4 mb-6">
-        <Link href="/admin/dashboard">
+      <div className="px-4 mb-6 flex items-center justify-between">
+        <Link href="/admin/dashboard" onClick={handleLinkClick}>
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white font-bold">
               GÇ
@@ -35,6 +46,11 @@ export default function Sidebar() {
             <span className="text-lg font-semibold">Admin Panel</span>
           </div>
         </Link>
+
+        {/* Mobil görünümde kapatma butonu */}
+        <Button variant="ghost" size="icon" className="lg:hidden" onClick={handleLinkClick} aria-label="Menüyü kapat">
+          <X className="h-5 w-5" />
+        </Button>
       </div>
 
       <nav className="space-y-1 px-2 flex-1">
@@ -43,6 +59,7 @@ export default function Sidebar() {
           className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
             isActive("/admin/dashboard") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
           }`}
+          onClick={handleLinkClick}
         >
           <Home className="h-5 w-5" />
           <span>Dashboard</span>
@@ -53,6 +70,7 @@ export default function Sidebar() {
           className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
             isActive("/admin/messages") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
           }`}
+          onClick={handleLinkClick}
         >
           <Mail className="h-5 w-5" />
           <span>Mesajlar</span>
@@ -65,6 +83,7 @@ export default function Sidebar() {
               ? "bg-primary/10 text-primary font-medium"
               : "text-gray-700 hover:bg-gray-100"
           }`}
+          onClick={handleLinkClick}
         >
           <Calendar className="h-5 w-5" />
           <span>Randevular</span>
@@ -75,6 +94,7 @@ export default function Sidebar() {
           className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
             isActive("/admin/services") ? "bg-primary/10 text-primary font-medium" : "text-gray-700 hover:bg-gray-100"
           }`}
+          onClick={handleLinkClick}
         >
           <BriefcaseBusiness className="h-5 w-5" />
           <span>Hizmetler</span>
@@ -103,6 +123,7 @@ export default function Sidebar() {
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
+                onClick={handleLinkClick}
               >
                 Tüm Yazılar
               </Link>
@@ -113,6 +134,7 @@ export default function Sidebar() {
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
+                onClick={handleLinkClick}
               >
                 Yeni Yazı
               </Link>
@@ -123,6 +145,7 @@ export default function Sidebar() {
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
+                onClick={handleLinkClick}
               >
                 Kategoriler
               </Link>
@@ -133,6 +156,7 @@ export default function Sidebar() {
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
+                onClick={handleLinkClick}
               >
                 Etiketler
               </Link>
@@ -143,6 +167,7 @@ export default function Sidebar() {
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
+                onClick={handleLinkClick}
               >
                 Yorumlar
               </Link>
