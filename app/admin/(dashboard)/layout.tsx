@@ -8,6 +8,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import Sidebar from "@/components/admin/sidebar"
 import { Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 export default function AdminDashboardLayout({
   children,
@@ -125,7 +126,10 @@ export default function AdminDashboardLayout({
         >
           <Menu className="h-6 w-6" />
         </Button>
-        <div className="font-semibold">Admin Panel</div>
+        <div className="flex items-center">
+          <Image src="/logo-gc.png" alt="GÜN ÇEVİK Hukuk Bürosu" width={40} height={40} className="h-8 w-auto mr-2" />
+          <div className="font-semibold">Admin Panel</div>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -140,6 +144,9 @@ export default function AdminDashboardLayout({
             lg:block
           `}
         >
+          <div className="p-4 border-b border-gray-200 flex justify-center lg:justify-start">
+            <Image src="/logo-gc.png" alt="GÜN ÇEVİK Hukuk Bürosu" width={100} height={100} className="h-14 w-auto" />
+          </div>
           <Sidebar onLinkClick={closeSidebar} />
         </div>
 

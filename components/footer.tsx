@@ -12,13 +12,7 @@ export function Footer() {
           {/* Logo ve Açıklama */}
           <div className="space-y-4">
             <Link href="/" className="inline-block">
-              <Image
-                src="/gc-law-logo-transparent.png"
-                alt="GÜN ÇEVİK Hukuk Bürosu"
-                width={180}
-                height={60}
-                className="h-12 w-auto"
-              />
+              <Image src="/logo-gc.png" alt="GÜN ÇEVİK Hukuk Bürosu" width={120} height={120} className="h-16 w-auto" />
             </Link>
             <p className="text-gray-300 text-sm">
               İzmir'de uzman hukuk danışmanlığı ve avukatlık hizmetleri sunan GÜN ÇEVİK Hukuk Bürosu, müvekkillerinin

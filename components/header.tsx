@@ -46,11 +46,11 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/gc-law-logo-transparent.png"
+              src="/logo-gc.png"
               alt="GÜN ÇEVİK Hukuk Bürosu"
-              width={180}
-              height={60}
-              className="h-12 w-auto"
+              width={120}
+              height={120}
+              className="h-16 w-auto"
               priority
             />
           </Link>
@@ -104,11 +104,11 @@ export function Header() {
                 <SheetHeader>
                   <SheetTitle className="text-left">
                     <Image
-                      src="/gc-law-logo-transparent.png"
+                      src="/logo-gc.png"
                       alt="GÜN ÇEVİK Hukuk Bürosu"
-                      width={150}
-                      height={50}
-                      className="h-10 w-auto"
+                      width={100}
+                      height={100}
+                      className="h-14 w-auto"
                     />
                   </SheetTitle>
                 </SheetHeader>
