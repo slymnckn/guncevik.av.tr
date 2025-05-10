@@ -122,21 +122,24 @@ export async function createBlogPost(formData: FormData) {
     }
 
     // Blog yazısını ekle
-    const { data, error } = await supabase.from("blog_posts").insert([
-      {
-        title,
-        slug,
-        excerpt,
-        content,
-        category_id: categoryId || null,
-        author_id: user.id,
-        meta_title: metaTitle,
-        meta_description: metaDescription,
-        published,
-        published_at: published ? new Date().toISOString() : null,
-        image_path: imagePath,
-      },
-    ])
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .insert([
+        {
+          title,
+          slug,
+          excerpt,
+          content,
+          category_id: categoryId || null,
+          author_id: user.id,
+          meta_title: metaTitle,
+          meta_description: metaDescription,
+          published,
+          published_at: published ? new Date().toISOString() : null,
+          image_path: imagePath,
+        },
+      ])
+      .select()
 
     if (error) {
       throw new Error(`Blog yazısı eklenirken hata oluştu: ${error.message}`)
@@ -173,7 +176,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
     // Mevcut blog yazısını al
     const { data: existingPost, error: fetchError } = await supabase
       .from("blog_posts")
-      .select("published, image_path")
+      .select("published, image_path, slug")
       .eq("id", id)
       .single()
 
@@ -239,6 +242,11 @@ export async function updateBlogPost(id: string, formData: FormData) {
     revalidatePath("/makaleler")
     revalidatePath(`/makaleler/${slug}`)
 
+    // Eğer slug değiştiyse, eski slug için de revalidate yapalım
+    if (existingPost.slug !== slug) {
+      revalidatePath(`/makaleler/${existingPost.slug}`)
+    }
+
     return { success: true }
   } catch (error: any) {
     console.error("Blog yazısı güncellenirken hata:", error)
@@ -279,6 +287,7 @@ export async function deleteBlogPost(id: string) {
 
     // Cache'i temizleyelim ve admin blog sayfasına yönlendirelim
     revalidatePath("/admin/blog")
+    revalidatePath("/makaleler")
     return { success: true }
   } catch (error) {
     console.error("Blog yazısı silinirken bir hata oluştu:", error)

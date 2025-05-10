@@ -72,6 +72,11 @@ export default async function AdminBlogPage() {
                 <td className="p-3">{post.view_count || 0}</td>
                 <td className="p-3">
                   <div className="flex justify-center gap-2">
+                    <Link href={`/makaleler/${post.slug}`} target="_blank">
+                      <Button variant="outline" size="icon" aria-label="Blog yazısını görüntüle">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
                     <Link href={`/admin/blog/edit/${post.id}`}>
                       <Button variant="outline" size="icon" aria-label="Blog yazısını düzenle">
                         <Edit className="h-4 w-4" />
@@ -123,7 +128,7 @@ export default async function AdminBlogPage() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t">
-              <Link href={`/makaleler/${post.slug}`}>
+              <Link href={`/makaleler/${post.slug}`} target="_blank">
                 <Button variant="ghost" size="sm" className="h-8">
                   <Eye className="h-4 w-4 mr-1" />
                   Görüntüle

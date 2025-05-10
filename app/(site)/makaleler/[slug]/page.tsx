@@ -1,5 +1,3 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { BlogSidebar } from "@/components/blog-sidebar"
@@ -11,6 +9,7 @@ import { ShareButtons } from "@/components/blog/share-buttons"
 import { CommentsSection } from "@/components/blog/comments-section"
 import type { Metadata } from "next"
 import { ArticleSchema } from "@/components/seo/article-schema"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 interface PageProps {
   params: { slug: string }
@@ -18,7 +17,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = createServerSupabaseClient()
 
   const { data: post } = await supabase
     .from("blog_posts")
@@ -56,7 +55,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = params
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = createServerSupabaseClient()
 
   try {
     // Blog yazısını getir
