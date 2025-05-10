@@ -17,59 +17,25 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
-  const supabase = createServerSupabaseClient()
-
   console.log("Generating metadata for slug:", slug)
 
-  const { data: post, error } = await supabase
-    .from("blog_posts")
-    .select(`title, meta_title, meta_description, excerpt, image_path`)
-    .eq("slug", slug)
-    .eq("published", true)
-    .single()
-
-  if (error) {
-    console.error("Error fetching post for metadata:", error)
-  }
-
-  if (!post) {
-    console.log("Post not found for metadata generation")
-    return {
-      title: "Makale Bulunamadı | GÜN ÇEVİK Hukuk Bürosu",
-      description: "Aradığınız makale bulunamadı.",
-    }
-  }
-
-  console.log("Post found for metadata:", post.title)
-
-  // Görsel URL'sini oluştur
-  let imageUrl = null
-  if (post.image_path) {
-    const { data } = await supabase.storage.from("blog-images").getPublicUrl(post.image_path)
-    imageUrl = data.publicUrl
-  }
-
   return {
-    title: post.meta_title || `${post.title} | GÜN ÇEVİK Hukuk Bürosu`,
-    description:
-      post.meta_description || post.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
-    openGraph: {
-      title: post.meta_title || post.title,
-      description: post.meta_description || post.excerpt || "",
-      type: "article",
-      images: imageUrl ? [{ url: imageUrl }] : undefined,
-    },
+    title: "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+    description: "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
   }
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = params
-  const supabase = createServerSupabaseClient()
-
   console.log("Rendering blog post page for slug:", slug)
 
   try {
+    // Supabase istemcisini oluştur
+    const supabase = createServerSupabaseClient()
+    console.log("Supabase client created")
+
     // Blog yazısını getir
+    console.log("Fetching blog post with slug:", slug)
     const { data: post, error } = await supabase
       .from("blog_posts")
       .select(`
@@ -82,6 +48,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
     if (error) {
       console.error("Error fetching blog post:", error)
+      console.error("Error details:", error.message, error.details, error.hint)
       notFound()
     }
 
@@ -104,7 +71,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         .single()
 
       if (author) {
-        authorName = author.name
+        authorName = author.name || authorName
         authorTitle = author.role === "admin" ? "Avukat" : author.role === "editor" ? "Hukuk Danışmanı" : ""
       }
     }
@@ -159,14 +126,28 @@ export default async function BlogPostPage({ params }: PageProps) {
 
     // İçeriği güvenli bir şekilde işle
     const safeContent = post.content || ""
+
+    // İçeriği paragraflarına ayır
+    // Farklı satır sonu karakterlerini destekle
     const paragraphs = safeContent
-      .split("\n\n")
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean)
+      .replace(/\r\n/g, "\n") // Windows satır sonlarını Unix formatına dönüştür
+      .split(/\n\n+/) // Boş satırlarla ayrılmış paragrafları bul
+      .map((paragraph) => {
+        // Her paragrafın içindeki tek satır sonlarını <br> ile değiştir
+        return paragraph
+          .split(/\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .join("<br />")
+      })
+      .filter(Boolean) // Boş paragrafları filtrele
 
     // Paylaşım URL'si
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
     const shareUrl = `${siteUrl}/makaleler/${post.slug}`
+
+    // Yazar adının ilk harfini güvenli bir şekilde al
+    const authorInitial = authorName && authorName.length > 0 ? authorName.charAt(0) : "G"
 
     return (
       <>
@@ -243,9 +224,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                   <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
                     {paragraphs.map((paragraph, index) => (
-                      <p key={index} className="mb-4">
-                        {paragraph}
-                      </p>
+                      <p key={index} className="mb-4" dangerouslySetInnerHTML={{ __html: paragraph }} />
                     ))}
                   </div>
 
@@ -253,7 +232,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     <div className="flex items-center">
                       <div className="mr-4">
                         <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xl font-bold">
-                          {authorName.charAt(0)}
+                          {authorInitial}
                         </div>
                       </div>
                       <div>
@@ -319,6 +298,18 @@ export default async function BlogPostPage({ params }: PageProps) {
     )
   } catch (error) {
     console.error("Blog yazısı sayfası yüklenirken hata oluştu:", error)
-    notFound()
+    return (
+      <div className="container py-8">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Bir Hata Oluştu</h1>
+          <p className="text-gray-600 mb-6">
+            Blog yazısı yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.
+          </p>
+          <Link href="/makaleler" className="text-primary hover:text-primary/80">
+            Tüm Makalelere Dön
+          </Link>
+        </div>
+      </div>
+    )
   }
 }

@@ -1,61 +1,68 @@
-import { createClient as supabaseCreateClient } from "@supabase/supabase-js"
-import type { Database } from "../types/database"
+import { createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
-// Singleton pattern - tek bir admin Supabase istemcisi oluştur
-let adminSupabaseClient: ReturnType<typeof supabaseCreateClient<Database>> | null = null
+export function createServerSupabaseClient() {
+  const cookieStore = cookies()
 
-export const createAdminSupabaseClient = () => {
-  if (adminSupabaseClient) return adminSupabaseClient
-
-  // Çevre değişkenlerini kontrol et
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Supabase URL or Key is missing")
+    throw new Error("Supabase URL or Key is missing")
+  }
+
+  return createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      get(name) {
+        return cookieStore.get(name)?.value
+      },
+      set(name, value, options) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch (error) {
+          // Çerezleri ayarlarken hata oluşursa, sessiz bir şekilde devam et
+          console.error("Error setting cookie:", error)
+        }
+      },
+      remove(name, options) {
+        try {
+          cookieStore.set({ name, value: "", ...options })
+        } catch (error) {
+          // Çerezleri kaldırırken hata oluşursa, sessiz bir şekilde devam et
+          console.error("Error removing cookie:", error)
+        }
+      },
+    },
+  })
+}
+
+// Alternatif Supabase istemcisi (doğrudan createClient kullanarak)
+export function createClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Supabase URL or Key is missing")
+    throw new Error("Supabase URL or Key is missing")
+  }
+
+  return createSupabaseClient(supabaseUrl, supabaseKey)
+}
+
+export function createAdminSupabaseClient() {
+  const supabaseUrl = process.env.SUPABASE_URL
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("Supabase çevre değişkenleri eksik:", {
-      url: supabaseUrl ? "Mevcut" : "Eksik",
-      key: supabaseServiceRoleKey ? "Mevcut" : "Eksik",
-    })
-    throw new Error("Supabase çevre değişkenleri eksik")
+    throw new Error("Supabase URL veya servis rolü anahtarı bulunamadı.")
   }
 
-  try {
-    adminSupabaseClient = supabaseCreateClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    })
-
-    return adminSupabaseClient
-  } catch (error) {
-    console.error("Admin Supabase client oluşturulurken hata:", error)
-    throw new Error("Admin Supabase client oluşturulurken hata")
-  }
-}
-
-// Geriye dönük uyumluluk için createServerSupabaseClient alias'ı
-export const createServerSupabaseClient = createAdminSupabaseClient
-
-// Geriye dönük uyumluluk için createClient export'u
-export const createClient = createAdminSupabaseClient
-
-// Admin profil kontrolü
-export async function getAdminProfile(userId: string) {
-  const supabase = createAdminSupabaseClient()
-
-  const { data, error } = await supabase.from("admin_profiles").select("*").eq("id", userId).single()
-
-  if (error) {
-    console.error("Admin profili bulunamadı:", error)
-    return null
-  }
-
-  return data
-}
-
-// Admin kontrolü
-export async function isUserAdmin(userId: string) {
-  const profile = await getAdminProfile(userId)
-  return profile?.role === "admin"
+  return createSupabaseClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
 }

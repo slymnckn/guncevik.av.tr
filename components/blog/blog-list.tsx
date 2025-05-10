@@ -28,6 +28,12 @@ export async function BlogList() {
 
   console.log(`Found ${posts?.length || 0} blog posts`)
 
+  if (posts) {
+    posts.forEach((post) => {
+      console.log(`Post: ${post.title}, Slug: ${post.slug}, URL: /makaleler/${post.slug}`)
+    })
+  }
+
   if (!posts || posts.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow">
@@ -39,8 +45,6 @@ export async function BlogList() {
   // Görsellerin URL'lerini oluştur
   const postsWithImages = await Promise.all(
     posts.map(async (post) => {
-      console.log(`Processing post: ${post.title}, slug: ${post.slug}`)
-
       let imageUrl = null
       if (post.image_path) {
         const { data } = await supabase.storage.from("blog-images").getPublicUrl(post.image_path)

@@ -194,7 +194,7 @@ const withCustomFeatures = (editor) => {
   return editor
 }
 
-export function Editor({ value, onChange, placeholder = "İçerik yazın...", className }: EditorProps) {
+export function EditorComponent({ value, onChange, placeholder = "İçerik yazın...", className }: EditorProps) {
   // Editör state'i
   const editor = useMemo(() => withCustomFeatures(withHistory(withReact(createEditor()))), [])
   const [editorValue, setEditorValue] = useState<Descendant[]>(INITIAL_VALUE)

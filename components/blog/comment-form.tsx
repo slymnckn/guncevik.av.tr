@@ -5,9 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 
@@ -90,9 +88,14 @@ export function CommentForm({ postId, parentId, onSuccess }: CommentFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>İsim</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="İsminiz" />
-                </FormControl>
+                <div className="mt-1">
+                  <input
+                    type="text"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="İsminiz"
+                    {...field}
+                  />
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -104,9 +107,14 @@ export function CommentForm({ postId, parentId, onSuccess }: CommentFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>E-posta</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="E-posta adresiniz" type="email" />
-                </FormControl>
+                <div className="mt-1">
+                  <input
+                    type="email"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="E-posta adresiniz"
+                    {...field}
+                  />
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -119,9 +127,14 @@ export function CommentForm({ postId, parentId, onSuccess }: CommentFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Yorum</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="Yorumunuz..." rows={4} />
-              </FormControl>
+              <div className="mt-1">
+                <textarea
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Yorumunuz..."
+                  rows={4}
+                  {...field}
+                />
+              </div>
               <FormMessage />
             </FormItem>
           )}
