@@ -3,7 +3,6 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, Clock } from "lucide-react"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
-import { slugify } from "@/lib/utils"
 
 export async function BlogList() {
   const supabase = createServerSupabaseClient()
@@ -11,19 +10,20 @@ export async function BlogList() {
   console.log("Fetching blog posts for blog list")
 
   // Blog yazılarını getir
-  const {
-    data: posts,
-    error,
-    count,
-  } = await supabase
+  const { data: posts, error } = await supabase
     .from("blog_posts")
-    .select("*, blog_categories(*)", { count: "exact" })
+    .select("*, blog_categories(*)")
     .eq("published", true)
     .order("published_at", { ascending: false })
     .limit(10)
 
   if (error) {
     console.error("Error fetching blog posts:", error)
+    return (
+      <div className="text-center py-12 bg-white rounded-lg shadow">
+        <p className="text-gray-500">Blog yazıları yüklenirken bir hata oluştu.</p>
+      </div>
+    )
   }
 
   console.log(`Found ${posts?.length || 0} blog posts`)
@@ -47,12 +47,8 @@ export async function BlogList() {
         imageUrl = data.publicUrl
       }
 
-      // Slug kontrolü
-      const safeSlug = post.slug || slugify(post.title)
-
       return {
         ...post,
-        safeSlug,
         imageUrl,
         date: post.published_at
           ? new Date(post.published_at).toLocaleDateString("tr-TR", {
@@ -102,13 +98,13 @@ export async function BlogList() {
                   <span>{featuredPost.date}</span>
                 </div>
                 <h3 className="text-2xl font-bold mb-4">
-                  <Link href={`/makaleler/${featuredPost.safeSlug}`} className="hover:text-primary transition-colors">
+                  <Link href={`/makaleler/${featuredPost.slug}`} className="hover:text-primary transition-colors">
                     {featuredPost.title}
                   </Link>
                 </h3>
                 <p className="text-gray-600 mb-6">{featuredPost.excerpt}</p>
                 <Button asChild className="w-fit">
-                  <Link href={`/makaleler/${featuredPost.safeSlug}`}>Devamını Oku</Link>
+                  <Link href={`/makaleler/${featuredPost.slug}`}>Devamını Oku</Link>
                 </Button>
               </div>
             </div>
@@ -146,11 +142,11 @@ export async function BlogList() {
                   <span>{post.date}</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                  <Link href={`/makaleler/${post.safeSlug}`}>{post.title}</Link>
+                  <Link href={`/makaleler/${post.slug}`}>{post.title}</Link>
                 </h3>
                 <p className="text-gray-600 mb-4 line-clamp-2">{post.excerpt}</p>
                 <Link
-                  href={`/makaleler/${post.safeSlug}`}
+                  href={`/makaleler/${post.slug}`}
                   className="text-primary font-medium hover:text-primary/80 transition-colors inline-flex items-center"
                 >
                   Devamını Oku
