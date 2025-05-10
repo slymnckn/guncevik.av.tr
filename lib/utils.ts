@@ -48,14 +48,37 @@ export function getStatusText(status: string) {
 }
 
 export function slugify(text: string) {
-  return text
-    .toString()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]+/g, "")
-    .replace(/--+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "")
+  if (!text) return ""
+
+  // Türkçe karakterleri değiştir
+  const turkishChars = {
+    ç: "c",
+    ğ: "g",
+    ı: "i",
+    ö: "o",
+    ş: "s",
+    ü: "u",
+    İ: "i",
+    Ç: "c",
+    Ğ: "g",
+    Ö: "o",
+    Ş: "s",
+    Ü: "u",
+  }
+
+  let newText = text.toString().toLowerCase()
+
+  // Türkçe karakterleri değiştir
+  for (const [key, value] of Object.entries(turkishChars)) {
+    newText = newText.replace(new RegExp(key, "g"), value)
+  }
+
+  return newText
+    .replace(/\s+/g, "-") // Boşlukları tire ile değiştir
+    .replace(/[^\w-]+/g, "") // Alfanümerik ve tire dışındaki karakterleri kaldır
+    .replace(/--+/g, "-") // Birden fazla tireyi tek tire ile değiştir
+    .replace(/^-+/, "") // Baştaki tireleri kaldır
+    .replace(/-+$/, "") // Sondaki tireleri kaldır
 }
 
 // Hatalı export kaldırıldı: export * from "./utils/index"

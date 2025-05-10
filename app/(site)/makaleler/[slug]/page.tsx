@@ -19,19 +19,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = params
   const supabase = createServerSupabaseClient()
 
-  const { data: post } = await supabase
+  console.log("Generating metadata for slug:", slug)
+
+  const { data: post, error } = await supabase
     .from("blog_posts")
     .select(`title, meta_title, meta_description, excerpt, image_path`)
     .eq("slug", slug)
     .eq("published", true)
     .single()
 
+  if (error) {
+    console.error("Error fetching post for metadata:", error)
+  }
+
   if (!post) {
+    console.log("Post not found for metadata generation")
     return {
       title: "Makale Bulunamadı | GÜN ÇEVİK Hukuk Bürosu",
       description: "Aradığınız makale bulunamadı.",
     }
   }
+
+  console.log("Post found for metadata:", post.title)
 
   // Görsel URL'sini oluştur
   let imageUrl = null
@@ -57,6 +66,8 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = params
   const supabase = createServerSupabaseClient()
 
+  console.log("Rendering blog post page for slug:", slug)
+
   try {
     // Blog yazısını getir
     const { data: post, error } = await supabase
@@ -69,10 +80,17 @@ export default async function BlogPostPage({ params }: PageProps) {
       .eq("published", true)
       .single()
 
-    if (error || !post) {
-      console.error("Blog post not found:", error)
+    if (error) {
+      console.error("Error fetching blog post:", error)
       notFound()
     }
+
+    if (!post) {
+      console.log("Blog post not found for slug:", slug)
+      notFound()
+    }
+
+    console.log("Blog post found:", post.title)
 
     // Yazar bilgisini ayrı bir sorguyla al
     let authorName = "GÜN ÇEVİK Hukuk Bürosu"
