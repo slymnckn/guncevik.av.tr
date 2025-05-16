@@ -10,10 +10,10 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
-    default: "GÜN ÇEVİK Hukuk Bürosu | İzmir'de Uzman Avukatlık Hizmetleri",
+    default: "Gün Çevik Hukuk | Ceza, Aile, İş ve Gayrimenkul Hukuku Uzmanı",
     template: "%s | GÜN ÇEVİK Hukuk Bürosu",
   },
-  description: "İzmir'de uzman hukuk danışmanlığı ve avukatlık hizmetleri.",
+  description: "Gün Çevik Hukuk Bürosu olarak İzmir'de ceza, aile, iş ve gayrimenkul hukuku alanlarında uzman avukatlarımızla profesyonel hukuki danışmanlık ve dava desteği sunuyoruz.",
   keywords: [
     "avukat",
     "hukuk bürosu",
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     "sigorta hukuku",
     "iş hukuku",
   ],
-  authors: [{ name: "GÜN ÇEVİK Hukuk Bürosu" }],
-  creator: "GÜN ÇEVİK Hukuk Bürosu",
-  publisher: "GÜN ÇEVİK Hukuk Bürosu",
+  authors: [{ name: "Av. İrfan Çevik" }],
+  creator: "Av. İrfan Çevik",
+  publisher: "Av. İrfan Çevik",
   formatDetection: {
     email: false,
     address: false,
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
     shortcut: ["/favicon.ico"],
   },
-    generator: 'v0.dev'
+    generator: 'broosmedia.com'
 }
 
 export default function RootLayout({
