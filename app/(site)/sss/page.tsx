@@ -16,11 +16,6 @@ export default function FaqPage() {
         "Hukuki danışmanlık hizmetimiz, müvekkillerimizin karşılaştıkları hukuki sorunlara çözüm bulmak amacıyla sunduğumuz profesyonel bir hizmettir. İlk görüşmede sorununuzu dinliyor, gerekli bilgi ve belgeleri inceliyor ve size en uygun hukuki stratejiyi sunuyoruz. Danışmanlık hizmetimiz kapsamında sözlü veya yazılı hukuki görüş sunabilir, gerekli hukuki belgeleri hazırlayabilir ve süreç boyunca size rehberlik edebiliriz.",
     },
     {
-      question: "İlk görüşme ücretli mi?",
-      answer:
-        "İlk tanışma görüşmemiz 30 dakika ile sınırlı olmak üzere ücretsizdir. Bu görüşmede hukuki sorununuzu genel hatlarıyla değerlendirir ve izlenecek yol hakkında bilgi veririz. Detaylı inceleme ve danışmanlık hizmetlerimiz ise ücrete tabidir. Ücretlendirme politikamız şeffaf olup, hizmet başlangıcında sizinle paylaşılmaktadır.",
-    },
-    {
       question: "Hangi hukuk alanlarında hizmet veriyorsunuz?",
       answer:
         "Büromuz başta ticaret hukuku, iş hukuku, sigorta hukuku, aile hukuku, gayrimenkul hukuku, miras hukuku, icra iflas hukuku ve ceza hukuku olmak üzere geniş bir yelpazede hukuki hizmet sunmaktadır. Her alanda uzmanlaşmış avukatlarımız ile müvekkillerimizin farklı hukuki ihtiyaçlarına cevap verebilmekteyiz.",
