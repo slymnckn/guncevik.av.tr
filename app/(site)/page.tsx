@@ -246,10 +246,9 @@ export default async function Home() {
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg">
-              <h3 className="text-xl font-bold mb-3">İlk danışmanlık görüşmesi ücretli midir?</h3>
+              <h3 className="text-xl font-bold mb-3">Hukuki danışmanlık hizmetiniz nasıl işliyor?</h3>
               <p className="mb-4 text-gray-600 dark:text-gray-300">
-                İlk tanışma ve ön değerlendirme görüşmemiz ücretsizdir. Bu görüşmede hukuki sorununuzu dinler ve size
-                nasıl yardımcı olabileceğimizi değerlendiririz.
+                Hukuki danışmanlık hizmetimiz, müvekkillerimizin karşılaştıkları hukuki sorunlara çözüm bulmak amacıyla sunduğumuz profesyonel bir hizmettir. İlk görüşmede sorununuzu dinliyor, gerekli bilgi ve belgeleri inceliyor ve size en uygun hukuki stratejiyi sunuyoruz. Danışmanlık hizmetimiz kapsamında sözlü veya yazılı hukuki görüş sunabilir, gerekli hukuki belgeleri hazırlayabilir ve süreç boyunca size rehberlik edebiliriz.
               </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all hover:shadow-lg">
