@@ -1,6 +1,5 @@
 import type React from "react"
 import { SiteWrapper } from "@/components/site-wrapper"
-import { SkipLink } from "@/components/a11y/skip-link"
 import LoadingIndicator from "@/components/loading-indicator"
 import { ScrollToTop } from "@/components/scroll-to-top"
 import { ThemeProvider } from "@/components/theme-provider"
