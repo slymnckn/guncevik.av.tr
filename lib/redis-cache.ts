@@ -41,19 +41,26 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
     console.log(`[RedisCache] DEBUG: Type of raw for key ${key}: ${typeof raw}`)
     console.log(`[RedisCache] DEBUG: Raw value for key ${key}:`, raw)
 
-    // raw'ın null, undefined veya string olmadığını kontrol et
-    if (typeof raw !== "string" || !raw) {
-      console.log(`[RedisCache] No data or invalid type in cache for key: ${key}. Returning null.`)
+    // Sadece raw'ın null veya undefined olup olmadığını kontrol et
+    if (!raw) {
+      console.log(`[RedisCache] No data in cache for key: ${key}. Returning null.`)
       return null
     }
 
-    // raw'ın bir string olduğunu bildiğimiz için substring'i güvenle kullanabiliriz
-    console.log(
-      `[RedisCache] Raw data from Redis for key ${key} (truncated):`,
-      raw.substring(0, Math.min(raw.length, 100)) + (raw.length > 100 ? "..." : ""),
-    )
+    let parsedData: T
+    if (typeof raw === "string") {
+      // If it's a string, parse it as JSON
+      parsedData = JSON.parse(raw) as T
+    } else if (typeof raw === "object" && raw !== null) {
+      // If it's already an object (and not null), assume it's already parsed
+      // This handles the case where @upstash/redis might be auto-parsing
+      parsedData = raw as T
+    } else {
+      // Handle unexpected types
+      console.warn(`[RedisCache] Unexpected raw data type for key ${key}: ${typeof raw}. Returning null.`)
+      return null
+    }
 
-    const parsedData = JSON.parse(raw) as T
     console.log(`[RedisCache] Successfully retrieved and parsed data for key: ${key}`)
     return parsedData
   } catch (error) {
