@@ -11,7 +11,6 @@ export default function SiteLayout({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-      <SkipLink />
       <LoadingIndicator />
       <div id="main-content" className="min-h-screen flex flex-col">
         <SiteWrapper>{children}</SiteWrapper>
