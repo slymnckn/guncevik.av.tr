@@ -10,6 +10,7 @@ import { CommentsSection } from "@/components/blog/comments-section"
 import type { Metadata } from "next"
 import { ArticleSchema } from "@/components/seo/article-schema"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { getBlogPost } from "@/actions/blog-cache-actions" // Import the cached action
 
 interface PageProps {
   params: { slug: string }
@@ -17,75 +18,100 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
-  console.log("Generating metadata for slug:", slug)
+  const supabase = createServerSupabaseClient()
+  const { data: post } = await supabase
+    .from("blog_posts")
+    .select("title, excerpt, image_path, published_at, updated_at, created_at")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single()
+
+  let imageUrl = null
+  if (post?.image_path) {
+    const { data } = await supabase.storage.from("blog-images").getPublicUrl(post.image_path)
+    imageUrl = data.publicUrl
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
 
   return {
-    title: "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
-    description: "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+    title: post?.title ? `${post.title} | GÜN ÇEVİK Hukuk Bürosu` : "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+    description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+    openGraph: {
+      title: post?.title || "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+      description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+      images: imageUrl ? [imageUrl] : [`${siteUrl}/gc-law-logo.png`],
+      url: `${siteUrl}/makaleler/${slug}`,
+      type: "article",
+      publishedTime: post?.published_at || post?.created_at,
+      modifiedTime: post?.updated_at || post?.published_at || post?.created_at,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post?.title || "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+      description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+      images: imageUrl ? [imageUrl] : [`${siteUrl}/gc-law-logo.png`],
+    },
   }
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = params
-  console.log("Rendering blog post page for slug:", slug)
 
   try {
-    // Supabase istemcisini oluştur
     const supabase = createServerSupabaseClient()
-    console.log("Supabase client created")
 
-    // Blog yazısını getir
-    console.log("Fetching blog post with slug:", slug)
-    const { data: post, error } = await supabase
-      .from("blog_posts")
-      .select(`
-        *,
-        blog_categories(id, name, slug)
-      `)
-      .eq("slug", slug)
-      .eq("published", true)
-      .single()
-
-    if (error) {
-      console.error("Error fetching blog post:", error)
-      console.error("Error details:", error.message, error.details, error.hint)
-      notFound()
-    }
+    // Parallelize data fetching
+    const [post, categoriesData, popularPostsData] = await Promise.all([
+      getBlogPost(slug), // Use the cached action here
+      supabase.from("blog_categories").select("id, name, slug").eq("is_active", true).order("name"),
+      getPopularBlogPosts(5),
+    ])
 
     if (!post) {
-      console.log("Blog post not found for slug:", slug)
       notFound()
     }
 
-    console.log("Blog post found:", post.title)
+    // Fetch author and related posts conditionally and in parallel if needed
+    const [authorResponse, postTagsResponse, relatedPostsResponse] = await Promise.all([
+      post.author_id
+        ? supabase.from("admin_profiles").select("name, role").eq("id", post.author_id).single()
+        : Promise.resolve({ data: null, error: null }),
+      supabase.from("blog_post_tags").select(`tag_id, blog_tags(id, name, slug)`).eq("post_id", post.id),
+      supabase
+        .from("blog_posts")
+        .select(`id, title, slug, excerpt, image_path`)
+        .eq("published", true)
+        .eq("category_id", post.category_id)
+        .neq("id", post.id)
+        .order("published_at", { ascending: false })
+        .limit(3),
+    ])
 
-    // Yazar bilgisini ayrı bir sorguyla al
+    const author = authorResponse.data
+    const postTags = postTagsResponse.data
+    const relatedPosts = relatedPostsResponse.data
+
+    // Yazar bilgisini ayarla
     let authorName = "GÜN ÇEVİK Hukuk Bürosu"
     let authorTitle = ""
-
-    if (post.author_id) {
-      const { data: author } = await supabase
-        .from("admin_profiles")
-        .select("name, role")
-        .eq("id", post.author_id)
-        .single()
-
-      if (author) {
-        authorName = author.name || authorName
-        authorTitle = author.role === "admin" ? "Avukat" : author.role === "editor" ? "Hukuk Danışmanı" : ""
-      }
+    if (author) {
+      authorName = author.name || authorName
+      authorTitle = author.role === "admin" ? "Avukat" : author.role === "editor" ? "Hukuk Danışmanı" : ""
     }
 
-    // Görüntülenme sayısını artır
-    await supabase
+    // Görüntülenme sayısını artır (fire and forget, doesn't block rendering)
+    supabase
       .from("blog_posts")
       .update({ view_count: (post.view_count || 0) + 1 })
       .eq("id", post.id)
+      .then(({ error }) => {
+        if (error) console.error("View count update error:", error)
+      })
 
     // Görsel URL'sini oluştur
     let imageUrl = null
     if (post.image_path) {
-      // Doğrudan Supabase Storage URL'sini oluştur
       const { data } = await supabase.storage.from("blog-images").getPublicUrl(post.image_path)
       imageUrl = data.publicUrl
     }
@@ -93,54 +119,38 @@ export default async function BlogPostPage({ params }: PageProps) {
     // Tarih formatını düzenle
     const publishDate = post.published_at ? formatDate(post.published_at) : null
 
-    // Yazının etiketlerini getir
-    const { data: postTags } = await supabase
-      .from("blog_post_tags")
-      .select(`
-        tag_id,
-        blog_tags(id, name, slug)
-      `)
-      .eq("post_id", post.id)
-
     const tags = postTags?.map((item) => item.blog_tags) || []
+    const categories = categoriesData?.data || []
+    const popularPosts = popularPostsData?.data || []
 
-    // Kategorileri getir (sidebar için)
-    const { data: categories } = await supabase
-      .from("blog_categories")
-      .select("id, name, slug")
-      .eq("is_active", true)
-      .order("name")
-
-    // Popüler yazıları getir (sidebar için)
-    const { data: popularPosts } = await getPopularBlogPosts(5)
-
-    // İlgili yazıları getir
-    const { data: relatedPosts } = await supabase
-      .from("blog_posts")
-      .select(`id, title, slug, excerpt, published_at, image_path`)
-      .eq("published", true)
-      .eq("category_id", post.category_id)
-      .neq("id", post.id)
-      .order("published_at", { ascending: false })
-      .limit(3)
+    // Fetch related post image URLs in parallel
+    let relatedPostsWithImages: any[] = []
+    if (relatedPosts && relatedPosts.length > 0) {
+      const imagePromises = relatedPosts.map(async (rp) => {
+        if (rp.image_path) {
+          const { data } = await supabase.storage.from("blog-images").getPublicUrl(rp.image_path)
+          return { ...rp, imageUrl: data.publicUrl }
+        }
+        return { ...rp, imageUrl: null }
+      })
+      relatedPostsWithImages = await Promise.all(imagePromises)
+    }
 
     // İçeriği güvenli bir şekilde işle
     const safeContent = post.content || ""
 
     // İçeriği paragraflarına ayır
-    // Farklı satır sonu karakterlerini destekle
     const paragraphs = safeContent
-      .replace(/\r\n/g, "\n") // Windows satır sonlarını Unix formatına dönüştür
-      .split(/\n\n+/) // Boş satırlarla ayrılmış paragrafları bul
+      .replace(/\r\n/g, "\n")
+      .split(/\n\n+/)
       .map((paragraph) => {
-        // Her paragrafın içindeki tek satır sonlarını <br> ile değiştir
         return paragraph
           .split(/\n/)
           .map((line) => line.trim())
           .filter(Boolean)
           .join("<br />")
       })
-      .filter(Boolean) // Boş paragrafları filtrele
+      .filter(Boolean)
 
     // Paylaşım URL'si
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
@@ -243,42 +253,33 @@ export default async function BlogPostPage({ params }: PageProps) {
                   </div>
 
                   {/* İlgili Yazılar */}
-                  {relatedPosts && relatedPosts.length > 0 && (
+                  {relatedPostsWithImages && relatedPostsWithImages.length > 0 && (
                     <div className="mt-12">
                       <h2 className="text-2xl font-bold mb-6">İlgili Yazılar</h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {relatedPosts.map((relatedPost) => {
-                          // Görsel URL'sini oluştur
-                          let relatedImageUrl = null
-                          if (relatedPost.image_path) {
-                            const { data } = supabase.storage.from("blog-images").getPublicUrl(relatedPost.image_path)
-                            relatedImageUrl = data.publicUrl
-                          }
-
-                          return (
-                            <Link key={relatedPost.id} href={`/makaleler/${relatedPost.slug}`} className="block group">
-                              <div className="bg-white rounded-lg shadow-md overflow-hidden h-full transition-transform group-hover:scale-[1.02]">
-                                {relatedImageUrl && (
-                                  <div className="h-40 overflow-hidden">
-                                    <OptimizedImage
-                                      src={relatedImageUrl}
-                                      alt={relatedPost.title}
-                                      className="w-full h-40 object-cover transition-transform group-hover:scale-105"
-                                    />
-                                  </div>
-                                )}
-                                <div className="p-4">
-                                  <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                                    {relatedPost.title}
-                                  </h3>
-                                  {relatedPost.excerpt && (
-                                    <p className="text-gray-600 text-sm line-clamp-2">{relatedPost.excerpt}</p>
-                                  )}
+                        {relatedPostsWithImages.map((relatedPost) => (
+                          <Link key={relatedPost.id} href={`/makaleler/${relatedPost.slug}`} className="block group">
+                            <div className="bg-white rounded-lg shadow-md overflow-hidden h-full transition-transform group-hover:scale-[1.02]">
+                              {relatedPost.imageUrl && (
+                                <div className="h-40 overflow-hidden">
+                                  <OptimizedImage
+                                    src={relatedPost.imageUrl}
+                                    alt={relatedPost.title}
+                                    className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                                  />
                                 </div>
+                              )}
+                              <div className="p-4">
+                                <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                                  {relatedPost.title}
+                                </h3>
+                                {relatedPost.excerpt && (
+                                  <p className="text-gray-600 text-sm line-clamp-2">{relatedPost.excerpt}</p>
+                                )}
                               </div>
-                            </Link>
-                          )
-                        })}
+                            </div>
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   )}
@@ -290,7 +291,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
 
             <div>
-              <BlogSidebar categories={categories || []} popularPosts={popularPosts || []} />
+              <BlogSidebar categories={categories} popularPosts={popularPosts} />
             </div>
           </div>
         </div>
