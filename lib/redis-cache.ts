@@ -36,17 +36,20 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
   }
   try {
     console.log(`[RedisCache] Attempting to get from cache: ${key}`)
-    const raw = await redis.get(key) // <--- Burada <string> tipini kaldırdık, runtime kontrolü için
+    const raw = await redis.get(key)
+
+    console.log(`[RedisCache] DEBUG: Type of raw for key ${key}: ${typeof raw}`)
+    console.log(`[RedisCache] DEBUG: Raw value for key ${key}:`, raw)
 
     // raw'ın null, undefined veya string olmadığını kontrol et
     if (typeof raw !== "string" || !raw) {
-      console.log(`[RedisCache] No data or invalid type in cache for key: ${key}. Raw value:`, raw)
+      console.log(`[RedisCache] No data or invalid type in cache for key: ${key}. Returning null.`)
       return null
     }
 
     // raw'ın bir string olduğunu bildiğimiz için substring'i güvenle kullanabiliriz
     console.log(
-      `[RedisCache] Raw data from Redis for key ${key}:`,
+      `[RedisCache] Raw data from Redis for key ${key} (truncated):`,
       raw.substring(0, Math.min(raw.length, 100)) + (raw.length > 100 ? "..." : ""),
     )
 
