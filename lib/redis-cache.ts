@@ -36,16 +36,26 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
   }
   try {
     console.log(`[RedisCache] Attempting to get from cache: ${key}`)
-    const raw = await redis.get<string>(key)
-    if (typeof raw !== "string") {
-      console.log(`[RedisCache] No data or invalid type in cache for key: ${key}`)
+    const raw = await redis.get(key) // <--- Burada <string> tipini kaldırdık, runtime kontrolü için
+
+    // raw'ın null, undefined veya string olmadığını kontrol et
+    if (typeof raw !== "string" || !raw) {
+      console.log(`[RedisCache] No data or invalid type in cache for key: ${key}. Raw value:`, raw)
       return null
     }
+
+    // raw'ın bir string olduğunu bildiğimiz için substring'i güvenle kullanabiliriz
+    console.log(
+      `[RedisCache] Raw data from Redis for key ${key}:`,
+      raw.substring(0, Math.min(raw.length, 100)) + (raw.length > 100 ? "..." : ""),
+    )
+
     const parsedData = JSON.parse(raw) as T
     console.log(`[RedisCache] Successfully retrieved and parsed data for key: ${key}`)
     return parsedData
   } catch (error) {
     console.error(`[RedisCache] Redis cache read/JSON parse error (key: ${key}): ${error.message}`)
+    // Bozuk veya JSON olmayan bir değerse, tekrar hata vermemek için sil
     try {
       await redis.del(key)
       console.log(`[RedisCache] Deleted corrupted Redis key: ${key}`)
