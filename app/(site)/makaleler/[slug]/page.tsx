@@ -9,29 +9,26 @@ import { ShareButtons } from "@/components/blog/share-buttons"
 import { CommentsSection } from "@/components/blog/comments-section"
 import type { Metadata } from "next"
 import { ArticleSchema } from "@/components/seo/article-schema"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { getBlogPost } from "@/actions/blog-cache-actions" // Import the cached action
+import { createAdminSupabaseClient } from "@/lib/supabase/admin"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 interface PageProps {
   params: { slug: string }
 }
 
+const supabaseAdmin = createAdminSupabaseClient()
+
 // generateMetadata fonksiyonunun hemen altına veya üstüne ekleyin
 export async function generateStaticParams() {
-  const supabase = createServerSupabaseClient()
-  const { data: posts } = await supabase.from("blog_posts").select("slug").eq("published", true)
+  const { data: posts } = await supabaseAdmin.from("blog_posts").select("slug").eq("published", true)
 
-  return (
-    posts?.map((post) => ({
-      slug: post.slug,
-    })) || []
-  )
+  return posts?.map((p) => ({ slug: p.slug })) ?? []
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
-  const supabase = createServerSupabaseClient()
-  const { data: post } = await supabase
+  const { data: post } = await supabaseAdmin
     .from("blog_posts")
     .select("title, excerpt, image_path, published_at, updated_at, created_at")
     .eq("slug", slug)
@@ -40,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   let imageUrl = null
   if (post?.image_path) {
-    const { data } = await supabase.storage.from("blog-images").getPublicUrl(post.image_path)
+    const { data } = await supabaseAdmin.storage.from("blog-images").getPublicUrl(post.image_path)
     imageUrl = data.publicUrl
   }
 
