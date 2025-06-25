@@ -16,6 +16,18 @@ interface PageProps {
   params: { slug: string }
 }
 
+// generateMetadata fonksiyonunun hemen altına veya üstüne ekleyin
+export async function generateStaticParams() {
+  const supabase = createServerSupabaseClient()
+  const { data: posts } = await supabase.from("blog_posts").select("slug").eq("published", true)
+
+  return (
+    posts?.map((post) => ({
+      slug: post.slug,
+    })) || []
+  )
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
   const supabase = createServerSupabaseClient()
@@ -55,6 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+// Mevcut BlogPostPage fonksiyonu aynı kalacak
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = params
 

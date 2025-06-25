@@ -31,25 +31,26 @@ const DEFAULT_CACHE_TIME = 60 * 60 * 24 // 24 saat
  */
 export async function getFromCache<T>(key: string): Promise<T | null> {
   if (!redis) {
-    console.log(`Redis bağlantısı yok, önbellekten okuma atlanıyor: ${key}`)
+    console.log(`[RedisCache] Redis bağlantısı yok, önbellekten okuma atlanıyor: ${key}`)
     return null
   }
-
   try {
+    console.log(`[RedisCache] Attempting to get from cache: ${key}`)
     const raw = await redis.get<string>(key)
     if (typeof raw !== "string") {
-      console.log(`Önbellekte veri yok veya geçersiz tip: ${key}`)
+      console.log(`[RedisCache] No data or invalid type in cache for key: ${key}`)
       return null
     }
-    return JSON.parse(raw) as T
+    const parsedData = JSON.parse(raw) as T
+    console.log(`[RedisCache] Successfully retrieved and parsed data for key: ${key}`)
+    return parsedData
   } catch (error) {
-    // Corrupted or non-JSON value – remove it so we don’t fail again
-    console.error(`Redis önbellek okuma/JSON parse hatası (anahtar: ${key}): ${error.message}`)
+    console.error(`[RedisCache] Redis cache read/JSON parse error (key: ${key}): ${error.message}`)
     try {
-      await redis.del(key) // Bozuk anahtarı sil
-      console.log(`Bozuk Redis anahtarı silindi: ${key}`)
+      await redis.del(key)
+      console.log(`[RedisCache] Deleted corrupted Redis key: ${key}`)
     } catch (delError) {
-      console.error("Redis önbellek silme hatası (parse hatası sonrası):", delError)
+      console.error("[RedisCache] Redis cache deletion error (after parse error):", delError)
     }
     return null
   }
@@ -60,16 +61,15 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
  */
 export async function setCache<T>(key: string, data: T, expireIn: number = DEFAULT_CACHE_TIME): Promise<void> {
   if (!redis) {
-    console.log(`Redis bağlantısı yok, önbelleğe yazma atlanıyor: ${key}`)
+    console.log(`[RedisCache] Redis bağlantısı yok, önbelleğe yazma atlanıyor: ${key}`)
     return
   }
-
   try {
     const payload = JSON.stringify(data)
     await redis.set(key, payload, { ex: expireIn })
-    console.log(`Redis önbelleğe yazıldı: ${key}`)
+    console.log(`[RedisCache] Successfully set cache for key: ${key}, expires in ${expireIn}s`)
   } catch (error) {
-    console.error(`Redis önbellek yazma/JSON stringify hatası (anahtar: ${key}): ${error.message}`)
+    console.error(`[RedisCache] Redis cache write/JSON stringify error (key: ${key}): ${error.message}`)
   }
 }
 
@@ -118,24 +118,24 @@ export async function getCachedOrFetch<T>(
   fetchFn: () => Promise<T>,
   expireIn: number = DEFAULT_CACHE_TIME,
 ): Promise<T> {
-  // Önbellekten veriyi almaya çalış
   const cachedData = await getFromCache<T>(key)
-
-  // Eğer önbellekte varsa, onu döndür
   if (cachedData !== null) {
-    console.log(`Cache hit for key: ${key}`)
+    console.log(`[RedisCache] Cache hit for key: ${key}`)
     return cachedData
   }
-
-  // Yoksa, fonksiyonu çalıştır
-  console.log(`Cache miss for key: ${key}, fetching fresh data...`)
-  const freshData = await fetchFn()
-
-  // Sonucu önbelleğe al
-  await setCache(key, freshData, expireIn)
-
-  // Sonucu döndür
-  return freshData
+  console.log(`[RedisCache] Cache miss for key: ${key}, fetching fresh data...`)
+  try {
+    const freshData = await fetchFn()
+    await setCache(key, freshData, expireIn)
+    console.log(`[RedisCache] Fresh data fetched and cached for key: ${key}`)
+    return freshData
+  } catch (error) {
+    console.error(`[RedisCache] Error fetching fresh data for key: ${key}: ${error.message}`)
+    // Hata durumunda, önbelleğe alınmamış olsa bile boş bir dizi döndürün
+    // Bu, uygulamanın çökmesini engeller ve UI'ın boş veriyle render edilmesini sağlar.
+    // Hatanın türüne göre daha spesifik bir fallback düşünebilirsiniz.
+    return [] as T // Eğer T bir dizi ise, boş bir dizi döndürün.
+  }
 }
 
 // Tüm önbelleği temizle
