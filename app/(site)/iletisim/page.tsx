@@ -26,11 +26,11 @@ export default function ContactPage() {
                 Adres
               </h2>
               <p className="mt-2 text-gray-700 dark:text-gray-300">
-                Konak Mahallesi 895. Sokak No:5 D:101, <br />
-                Konak / İzmir
+                Çınar, 5003/2 Sk. No:3 D:202 <br />
+                Gümüş Plaza Optimus 35090 Bornova İzmir
               </p>
               <a
-                href="https://maps.google.com/?q=Konak+Mahallesi+895.+Sokak+No:5+D:101,+Konak+/+İzmir"
+                href="https://maps.google.com/?q=Çınar+5003/2+Sk.+No:3+D:202+Gümüş+Plaza+Optimus+35090+Bornova+İzmir"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center mt-4 text-primary hover:underline"
@@ -102,7 +102,7 @@ export default function ContactPage() {
               <h2 className="text-2xl font-semibold mb-6">Konum</h2>
               <div className="h-[400px] w-full rounded-lg overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3125.9661035087707!2d27.13!3d38.42!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14bbd8e2c1b0d0a9%3A0x7b0d8b767a6d82d2!2sKonak%2C%20Konak%2FIzmir%2C%20Turkey!5e0!3m2!1sen!2sus!4v1651234567890!5m2!1sen!2sus"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3125.5!2d27.22!3d38.46!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDI3JzM2LjAiTiAyN8KwMTMnMTIuMCJF!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}

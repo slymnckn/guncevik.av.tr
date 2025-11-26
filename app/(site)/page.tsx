@@ -41,10 +41,10 @@ export default async function Home() {
         url={siteUrl}
         logo={`${siteUrl}/gc-law-logo.png`}
         address={{
-          streetAddress: "Konak Mahallesi 895. Sokak No:5 D:101",
-          addressLocality: "Konak",
+          streetAddress: "Çınar, 5003/2 Sk. No:3 D:202 Gümüş Plaza Optimus",
+          addressLocality: "Bornova",
           addressRegion: "İzmir",
-          postalCode: "35000",
+          postalCode: "35090",
           addressCountry: "TR",
         }}
         telephone="+905536671658"
@@ -52,8 +52,8 @@ export default async function Home() {
         sameAs={["https://www.linkedin.com/company/guncevikhukuk"]}
         openingHours={["Mo-Fr 09:00-18:00"]}
         geo={{
-          latitude: 38.4192,
-          longitude: 27.1287,
+          latitude: 38.46,
+          longitude: 27.22,
         }}
       />
 
