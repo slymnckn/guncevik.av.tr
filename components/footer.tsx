@@ -157,6 +157,23 @@ export function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
           <p>© {currentYear} GÜN ÇEVİK Hukuk Bürosu. Tüm hakları saklıdır.</p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <span className="text-gray-500 text-xs">Powered by</span>
+            <a
+              href="https://www.broostech.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block opacity-70 hover:opacity-100 transition-opacity"
+            >
+              <Image
+                src="/broos-tech.png"
+                alt="Broos Tech"
+                width={80}
+                height={24}
+                className="h-5 w-auto"
+              />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
