@@ -17,50 +17,71 @@ interface PageProps {
   params: { slug: string }
 }
 
-const supabaseAdmin = createAdminSupabaseClient()
-
 // generateMetadata fonksiyonunun hemen altına veya üstüne ekleyin
 export async function generateStaticParams() {
-  const { data: posts } = await supabaseAdmin.from("blog_posts").select("slug").eq("published", true)
-
-  return posts?.map((p) => ({ slug: p.slug })) ?? []
+  try {
+    const supabaseAdmin = createAdminSupabaseClient()
+    const { data: posts } = await supabaseAdmin.from("blog_posts").select("slug").eq("published", true)
+    return posts?.map((p) => ({ slug: p.slug })) ?? []
+  } catch {
+    // Build ortamında env değişkenleri olmayabilir, boş dön
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
-  const { data: post } = await supabaseAdmin
-    .from("blog_posts")
-    .select("title, excerpt, image_path, published_at, updated_at, created_at")
-    .eq("slug", slug)
-    .eq("published", true)
-    .single()
 
-  let imageUrl = null
-  if (post?.image_path) {
-    const { data } = await supabaseAdmin.storage.from("blog-images").getPublicUrl(post.image_path)
-    imageUrl = data.publicUrl
-  }
+  try {
+    const supabaseAdmin = createAdminSupabaseClient()
+    const { data: post } = await supabaseAdmin
+      .from("blog_posts")
+      .select("title, excerpt, image_path, published_at, updated_at, created_at")
+      .eq("slug", slug)
+      .eq("published", true)
+      .single()
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
+    let imageUrl = null
+    if (post?.image_path) {
+      const { data } = supabaseAdmin.storage.from("blog-images").getPublicUrl(post.image_path)
+      imageUrl = data.publicUrl
+    }
 
-  return {
-    title: post?.title ? `${post.title} | GÜN ÇEVİK Hukuk Bürosu` : "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
-    description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
-    openGraph: {
-      title: post?.title || "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
+
+    return {
+      title: post?.title ? `${post.title} | GÜN ÇEVİK Hukuk Bürosu` : "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
       description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
-      images: imageUrl ? [imageUrl] : [`${siteUrl}/gc-law-logo.png`],
-      url: `${siteUrl}/makaleler/${slug}`,
-      type: "article",
-      publishedTime: post?.published_at || post?.created_at,
-      modifiedTime: post?.updated_at || post?.published_at || post?.created_at,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post?.title || "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
-      description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
-      images: imageUrl ? [imageUrl] : [`${siteUrl}/gc-law-logo.png`],
-    },
+      openGraph: {
+        title: post?.title || "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+        description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+        images: imageUrl ? [imageUrl] : [`${siteUrl}/gc-law-logo.png`],
+        url: `${siteUrl}/makaleler/${slug}`,
+        type: "article",
+        publishedTime: post?.published_at || post?.created_at,
+        modifiedTime: post?.updated_at || post?.published_at || post?.created_at,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post?.title || "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+        description: post?.excerpt || "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+        images: imageUrl ? [imageUrl] : [`${siteUrl}/gc-law-logo.png`],
+      },
+    }
+  } catch {
+    // Fallback metadata
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
+    return {
+      title: "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+      description: "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+      openGraph: {
+        title: "Blog Yazısı | GÜN ÇEVİK Hukuk Bürosu",
+        description: "GÜN ÇEVİK Hukuk Bürosu'nun hukuki konularda bilgilendirici makaleleri.",
+        images: [`${siteUrl}/gc-law-logo.png`],
+        url: `${siteUrl}/makaleler/${slug}`,
+        type: "article",
+      },
+    }
   }
 }
 
