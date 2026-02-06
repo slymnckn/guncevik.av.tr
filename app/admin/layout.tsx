@@ -3,6 +3,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "../globals.css"
 
+// Admin sayfaları build sırasında statik oluşturulmasın
+export const dynamic = "force-dynamic"
+
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -25,11 +28,6 @@ export default function AdminLayout({
 }) {
   return (
     <div className={`${inter.className} bg-gray-50 min-h-screen`}>
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.png" type="image/png" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-      </head>
       {children}
     </div>
   )

@@ -1,11 +1,10 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { MetadataRoute } from "next"
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createServerSupabaseClient()
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
+export const dynamic = "force-dynamic"
 
-  // Sitemap.ts dosyasındaki staticPages dizisinden referanslar sayfasını kaldıralım
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
 
   // Statik sayfalar
   const staticPages = [
@@ -61,45 +60,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // Blog yazılarını getir
-  const { data: blogPosts } = await supabase
-    .from("blog_posts")
-    .select("slug, updated_at, published_at")
-    .eq("published", true)
-    .order("published_at", { ascending: false })
+  try {
+    const supabase = await createServerSupabaseClient()
 
-  // Blog kategorilerini getir
-  const { data: categories } = await supabase.from("blog_categories").select("slug").eq("is_active", true)
+    const [{ data: blogPosts }, { data: categories }, { data: tags }] = await Promise.all([
+      supabase
+        .from("blog_posts")
+        .select("slug, updated_at, published_at")
+        .eq("published", true)
+        .order("published_at", { ascending: false }),
+      supabase.from("blog_categories").select("slug").eq("is_active", true),
+      supabase.from("blog_tags").select("slug").eq("is_active", true),
+    ])
 
-  // Blog etiketlerini getir
-  const { data: tags } = await supabase.from("blog_tags").select("slug").eq("is_active", true)
+    const blogEntries =
+      blogPosts?.map((post) => ({
+        url: `${baseUrl}/makaleler/${post.slug}`,
+        lastModified: new Date(post.updated_at || post.published_at),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      })) || []
 
-  // Blog yazıları için sitemap girişleri
-  const blogEntries =
-    blogPosts?.map((post) => ({
-      url: `${baseUrl}/makaleler/${post.slug}`,
-      lastModified: new Date(post.updated_at || post.published_at),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })) || []
+    const categoryEntries =
+      categories?.map((category) => ({
+        url: `${baseUrl}/makaleler/kategori/${category.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+      })) || []
 
-  // Kategori sayfaları için sitemap girişleri
-  const categoryEntries =
-    categories?.map((category) => ({
-      url: `${baseUrl}/makaleler/kategori/${category.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    })) || []
+    const tagEntries =
+      tags?.map((tag) => ({
+        url: `${baseUrl}/makaleler/etiket/${tag.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+      })) || []
 
-  // Etiket sayfaları için sitemap girişleri
-  const tagEntries =
-    tags?.map((tag) => ({
-      url: `${baseUrl}/makaleler/etiket/${tag.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    })) || []
-
-  // Tüm girişleri birleştir
-  return [...staticPages, ...blogEntries, ...categoryEntries, ...tagEntries]
+    return [...staticPages, ...blogEntries, ...categoryEntries, ...tagEntries]
+  } catch {
+    // Supabase bağlantısı yoksa sadece statik sayfaları döndür
+    return staticPages
+  }
 }
