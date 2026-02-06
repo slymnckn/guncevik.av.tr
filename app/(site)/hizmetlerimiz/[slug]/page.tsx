@@ -4,6 +4,8 @@ import { notFound } from "next/navigation"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { getIconComponent } from "@/lib/utils/icon-helper"
 
+export const dynamic = "force-dynamic"
+
 interface ServicePageProps {
   params: {
     slug: string

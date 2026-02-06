@@ -4,6 +4,8 @@ import { BlogSidebar } from "@/components/blog-sidebar"
 import { BlogCard } from "@/components/blog-card"
 import { getPopularBlogPosts } from "@/actions/public-actions"
 
+export const dynamic = "force-dynamic"
+
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: tag } = await supabase.from("blog_tags").select("name").eq("slug", params.slug).single()

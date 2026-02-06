@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { notFound } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: category } = await supabase.from("blog_categories").select("name").eq("slug", params.slug).single()

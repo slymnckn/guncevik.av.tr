@@ -10,31 +10,21 @@ import { CommentsSection } from "@/components/blog/comments-section"
 import type { Metadata } from "next"
 import { ArticleSchema } from "@/components/seo/article-schema"
 import { getBlogPost } from "@/actions/blog-cache-actions" // Import the cached action
-import { createAdminSupabaseClient } from "@/lib/supabase/admin"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 interface PageProps {
   params: { slug: string }
 }
 
-// generateMetadata fonksiyonunun hemen altına veya üstüne ekleyin
-export async function generateStaticParams() {
-  try {
-    const supabaseAdmin = createAdminSupabaseClient()
-    const { data: posts } = await supabaseAdmin.from("blog_posts").select("slug").eq("published", true)
-    return posts?.map((p) => ({ slug: p.slug })) ?? []
-  } catch {
-    // Build ortamında env değişkenleri olmayabilir, boş dön
-    return []
-  }
-}
+// Sayfa dinamik render edilsin (cookies kullanıldığı için)
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = params
 
   try {
-    const supabaseAdmin = createAdminSupabaseClient()
-    const { data: post } = await supabaseAdmin
+    const supabase = await createServerSupabaseClient()
+    const { data: post } = await supabase
       .from("blog_posts")
       .select("title, excerpt, image_path, published_at, updated_at, created_at")
       .eq("slug", slug)
@@ -43,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     let imageUrl = null
     if (post?.image_path) {
-      const { data } = supabaseAdmin.storage.from("blog-images").getPublicUrl(post.image_path)
+      const { data } = supabase.storage.from("blog-images").getPublicUrl(post.image_path)
       imageUrl = data.publicUrl
     }
 
