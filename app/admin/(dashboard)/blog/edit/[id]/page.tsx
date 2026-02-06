@@ -12,7 +12,7 @@ interface EditBlogPageProps {
 
 export default async function EditBlogPage({ params }: EditBlogPageProps) {
   const { id } = params
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Blog yazısını getir
   const { data: post, error: postError } = await supabase.from("blog_posts").select("*").eq("id", id).single()

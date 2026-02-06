@@ -1,11 +1,10 @@
 "use server"
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function getSettings() {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kullanıcının oturum açıp açmadığını kontrol et
   const {
@@ -33,7 +32,7 @@ export async function getSettings() {
 }
 
 export async function updateSettings(id: string, value: any) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kullanıcının oturum açıp açmadığını kontrol et
   const {

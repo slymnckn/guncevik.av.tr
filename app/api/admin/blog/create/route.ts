@@ -8,7 +8,7 @@ const BUCKET_NAME = "blog-images"
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     // Admin client'ı oluştur (servis rolü ile)
     const adminClient = createAdminSupabaseClient()
 

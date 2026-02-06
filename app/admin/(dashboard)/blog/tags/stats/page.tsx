@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export default async function TagStatsPage() {
   await requireAuth()
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Etiketleri ve kullanım sayılarını getir
   const { data: tags, error } = await supabase

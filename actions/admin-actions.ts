@@ -6,7 +6,7 @@ import { redirect } from "next/navigation"
 
 export async function updateContactStatus(id: string, status: string) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     const { error } = await supabase
       .from("contact_submissions")
@@ -34,7 +34,7 @@ export async function updateContactStatus(id: string, status: string) {
 
 export async function deleteContactSubmission(id: string) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     const { error } = await supabase.from("contact_submissions").delete().eq("id", id)
 

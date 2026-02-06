@@ -3,6 +3,15 @@ import { revalidatePath } from "next/cache"
 
 export async function GET(request: NextRequest) {
   try {
+    // Revalidation secret kontrolü
+    const secret = request.nextUrl.searchParams.get("secret")
+    if (secret !== process.env.REVALIDATION_SECRET) {
+      return NextResponse.json(
+        { message: "Yetkisiz erişim", success: false },
+        { status: 401 }
+      )
+    }
+
     // URL'den path parametresini al
     const path = request.nextUrl.searchParams.get("path")
 

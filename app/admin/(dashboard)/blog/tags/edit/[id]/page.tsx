@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { TagForm } from "@/components/admin/blog/tag-form"
 
 export default async function EditTagPage({ params }: { params: { id: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   const { data: tag, error } = await supabase.from("blog_tags").select("*").eq("id", params.id).single()
 

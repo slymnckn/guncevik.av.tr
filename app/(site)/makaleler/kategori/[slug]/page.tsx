@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import Image from "next/image"
 import { BlogSidebar } from "@/components/blog-sidebar"
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { notFound } from "next/navigation"
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
   const { data: category } = await supabase.from("blog_categories").select("name").eq("slug", params.slug).single()
 
   if (!category) {
@@ -26,7 +25,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kategoriyi getir
   const { data: category } = await supabase.from("blog_categories").select("*").eq("slug", params.slug).single()

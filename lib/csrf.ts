@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "crypto"
+import { createHash, randomBytes, timingSafeEqual } from "crypto"
 
 // CSRF token oluştur
 export function generateCSRFToken(): string {
@@ -11,20 +11,18 @@ export function validateCSRFToken(token: string, storedToken: string): boolean {
     return false
   }
 
-  // Sabit zamanlı karşılaştırma (timing attack'lara karşı koruma)
-  const a = Buffer.from(token)
-  const b = Buffer.from(storedToken)
+  try {
+    const a = Buffer.from(token, "utf8")
+    const b = Buffer.from(storedToken, "utf8")
 
-  if (a.length !== b.length) {
+    if (a.length !== b.length) {
+      return false
+    }
+
+    return timingSafeEqual(a, b)
+  } catch {
     return false
   }
-
-  let result = 0
-  for (let i = 0; i < a.length; i++) {
-    result |= a[i] ^ b[i]
-  }
-
-  return result === 0
 }
 
 // CSRF token hash'i oluştur

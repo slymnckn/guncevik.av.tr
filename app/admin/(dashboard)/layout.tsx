@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/client"
 import Sidebar from "@/components/admin/sidebar"
 import { Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ export default function AdminDashboardLayout({
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   // Ekran genişliğini takip etmek için
   const [isMobile, setIsMobile] = useState(false)

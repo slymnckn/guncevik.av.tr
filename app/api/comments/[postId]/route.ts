@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function GET(request: Request, { params }: { params: { postId: string } }) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.postId
 
     // Validate post ID

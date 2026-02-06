@@ -5,7 +5,7 @@ import { TrendingUp, Clock } from "lucide-react"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function BlogList() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   console.log("Fetching blog posts for blog list")
 

@@ -16,7 +16,7 @@ import {
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { tr } from "date-fns/locale"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/client"
 import type { Database } from "@/lib/types/database"
 import type { ContactSubmission, AppointmentRequest } from "@/lib/types"
 
@@ -38,7 +38,7 @@ export default function DashboardPage() {
   const [recentAppointments, setRecentAppointments] = useState<AppointmentRequest[]>([])
   const [recentBlogPosts, setRecentBlogPosts] = useState<any[]>([])
 
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getSupabaseClient()
 
   // Verileri yükle
   useEffect(() => {

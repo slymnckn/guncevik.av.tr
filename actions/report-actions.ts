@@ -5,7 +5,7 @@ import { formatDateRange } from "@/lib/utils/formatting"
 import { type ReportData, type TimeRange, statusLabels, serviceAreaLabels } from "@/lib/types/reports"
 
 export async function getReportData(timeRange: TimeRange): Promise<ReportData> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Zaman aralığı için tarih hesaplama
   const { startDate, endDate } = getDateRangeFromTimeRange(timeRange)

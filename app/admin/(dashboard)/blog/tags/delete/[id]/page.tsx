@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { DeleteTag } from "@/components/admin/blog/delete-tag"
 
 export default async function DeleteTagPage({ params }: { params: { id: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   const { data: tag, error } = await supabase.from("blog_tags").select("*").eq("id", params.id).single()
 

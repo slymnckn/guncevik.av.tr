@@ -1,9 +1,11 @@
+"use server"
+
 import { createServerSupabaseClient } from "@/lib/supabase/server" // Doğru import
 import { getCachedOrFetch, invalidateCache } from "@/lib/redis-cache"
 
 // Tüm blog yazılarını getir
 export async function getPublicBlogPosts() {
-  const supabase = createServerSupabaseClient() // createClient yerine createServerSupabaseClient kullanıldı
+  const supabase = await createServerSupabaseClient() // createClient yerine createServerSupabaseClient kullanıldı
 
   const cacheKey = `public-blog-posts` // createCacheKey yerine doğrudan string kullanıldı
 
@@ -41,13 +43,10 @@ export async function getPublicBlogPosts() {
 
 // Popüler blog yazılarını getir
 export async function getPopularBlogPosts(limit = 5) {
-  console.log(`[getPopularBlogPosts] Fetching popular posts with limit: ${limit}`)
-  // createCacheKey yerine doğrudan string kullanıldı
   return getCachedOrFetch(
     `popular-blog-posts-{"limit":${limit}}`,
     async () => {
-      console.log(`[getPopularBlogPosts] Cache miss for popular posts, fetching from DB.`)
-      const supabase = createServerSupabaseClient() // createClient yerine createServerSupabaseClient kullanıldı
+      const supabase = await createServerSupabaseClient()
       const { data, error } = await supabase
         .from("blog_posts")
         .select(
@@ -61,13 +60,12 @@ export async function getPopularBlogPosts(limit = 5) {
         .limit(limit)
 
       if (error) {
-        console.error("[getPopularBlogPosts] Error fetching popular posts from DB:", error)
+        console.error("[getPopularBlogPosts] Error:", error)
         return []
       }
-      console.log(`[getPopularBlogPosts] Successfully fetched ${data.length} popular posts from DB.`)
       return data
     },
-    3600, // 1 saat önbellekte tut
+    3600,
   )
 }
 

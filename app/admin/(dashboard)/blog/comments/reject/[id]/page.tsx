@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic"
 
 export default async function RejectCommentPage({ params }: PageProps) {
   await requireAuth()
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data: comment, error } = await supabase
     .from("blog_comments")

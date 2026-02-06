@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 
 export default async function NewBlogPage() {
   // Supabase client oluştur
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Kategorileri getir
   const { data: categories, error } = await supabase.from("blog_categories").select("*").order("name")

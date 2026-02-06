@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 export default async function DeleteCategoryPage({ params }: { params: { id: string } }) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data: category, error } = await supabase.from("blog_categories").select("*").eq("id", params.id).single()
 

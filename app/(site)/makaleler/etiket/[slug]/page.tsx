@@ -1,12 +1,11 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { BlogSidebar } from "@/components/blog-sidebar"
 import { BlogCard } from "@/components/blog-card"
 import { getPopularBlogPosts } from "@/actions/public-actions"
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
   const { data: tag } = await supabase.from("blog_tags").select("name").eq("slug", params.slug).single()
 
   if (!tag) {
@@ -23,7 +22,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function BlogTagPage({ params }: { params: { slug: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   try {
     // Etiketi getir

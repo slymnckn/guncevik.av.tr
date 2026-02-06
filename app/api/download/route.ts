@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Initialize Supabase client
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = await createServerSupabaseClient()
 
     // Download the file from Supabase Storage
     const { data, error } = await supabase.storage.from("consultation-files").download(filePath)

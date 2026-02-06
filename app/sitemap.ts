@@ -1,9 +1,8 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { MetadataRoute } from "next"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://guncevik.av.tr"
 
   // Sitemap.ts dosyasındaki staticPages dizisinden referanslar sayfasını kaldıralım

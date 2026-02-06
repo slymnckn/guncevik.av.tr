@@ -122,7 +122,7 @@ export function Footer() {
             <ul className="space-y-3 text-gray-300">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 mr-2 text-primary shrink-0 mt-1" />
-                <span>Çınar, 5003/2 Sk. No:3 D:202 Gümüş Plaza Optimus 35090 Bornova İzmir</span>
+                <span>Çınar, 5003/2 Sk. No:3/5 D:202 Gümüş Plaza Optimus 35090 Bornova İzmir</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-primary shrink-0" />

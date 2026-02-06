@@ -19,7 +19,7 @@ const iconNameMap: Record<string, string> = {
 
 // Veritabanındaki tüm hizmetlerin ikonlarını standartlaştıran fonksiyon
 export async function standardizeServiceIcons() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     // Tüm hizmetleri getir

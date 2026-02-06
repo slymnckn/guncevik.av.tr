@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 
 // Tüm hizmetleri getir
 export async function getAllServices() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { data: services, error } = await supabase.from("services").select("*").order("title", { ascending: true })
@@ -24,7 +24,7 @@ export async function getAllServices() {
 
 // Hizmet ekle
 export async function addService(serviceData: any) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { data, error } = await supabase.from("services").insert(serviceData).select()
@@ -47,7 +47,7 @@ export async function addService(serviceData: any) {
 
 // Hizmet güncelle
 export async function updateService(id: string, serviceData: any) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { data, error } = await supabase.from("services").update(serviceData).eq("id", id).select()
@@ -70,7 +70,7 @@ export async function updateService(id: string, serviceData: any) {
 
 // Hizmet sil
 export async function deleteService(id: string) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { error } = await supabase.from("services").delete().eq("id", id)

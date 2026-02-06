@@ -2,19 +2,21 @@
 import { revalidatePath } from "next/cache"
 import { createClient } from "@supabase/supabase-js"
 
-// Doğrudan Supabase bağlantısı oluştur
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-})
+// Her istekte yeni Supabase istemcisi oluşturan yardımcı fonksiyon
+function createAdminSupabase() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
 
 export async function updateAppointmentStatus(id: string, status: string, notes?: string) {
   try {
     console.log(`Server: Randevu durumu güncelleniyor - ID: ${id}, Status: ${status}`)
 
-    // Doğrudan Supabase bağlantısı kullan
+    const supabase = createAdminSupabase()
     const { error } = await supabase
       .from("appointments")
       .update({
@@ -48,7 +50,7 @@ export async function deleteAppointment(id: string) {
   try {
     console.log(`Server: Randevu siliniyor - ID: ${id}`)
 
-    // Doğrudan Supabase bağlantısı kullan
+    const supabase = createAdminSupabase()
     const { error } = await supabase.from("appointments").delete().eq("id", id)
 
     if (error) {
@@ -70,8 +72,6 @@ export async function deleteAppointment(id: string) {
 
 export async function createAppointment(formData: FormData) {
   try {
-    console.log("Server: Randevu oluşturma başladı")
-
     const name = formData.get("name") as string
     const email = formData.get("email") as string
     const phone = formData.get("phone") as string
@@ -80,20 +80,11 @@ export async function createAppointment(formData: FormData) {
     const subject = formData.get("subject") as string
     const message = formData.get("message") as string
 
-    console.log("Server: Randevu verileri:", {
-      name,
-      email,
-      phone,
-      appointmentDate,
-      appointmentTime,
-      subject,
-      message,
-    })
-
     if (!name || !email || !phone || !appointmentDate || !appointmentTime) {
-      console.error("Server: Eksik alanlar:", { name, email, phone, appointmentDate, appointmentTime })
       throw new Error("Lütfen tüm zorunlu alanları doldurun.")
     }
+
+    const supabase = createAdminSupabase()
 
     // Randevu oluştur
     const { data, error } = await supabase
@@ -115,7 +106,7 @@ export async function createAppointment(formData: FormData) {
       throw new Error(`Randevu oluşturulurken hata: ${error.message}`)
     }
 
-    console.log("Server: Randevu başarıyla oluşturuldu:", data)
+    console.log("Server: Randevu başarıyla oluşturuldu")
 
     // Sayfaları yenile
     revalidatePath("/admin/appointments")
@@ -129,7 +120,7 @@ export async function createAppointment(formData: FormData) {
 
 export async function getAppointmentById(id: string) {
   try {
-    console.log(`Server: Randevu getiriliyor - ID: ${id}`)
+    const supabase = createAdminSupabase()
 
     const { data, error } = await supabase.from("appointments").select("*").eq("id", id).single()
 

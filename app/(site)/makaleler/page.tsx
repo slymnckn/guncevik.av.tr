@@ -18,7 +18,7 @@ export default async function BlogPage({
   const pageSize = 6
 
   // Blog yazılarını getir
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Blog yazılarını getir
   const { data: posts, count } = await supabase

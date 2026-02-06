@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function updateMessageStatus(messageId: string, status: string) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     const { error } = await supabase
       .from("contact_submissions")
@@ -38,7 +38,7 @@ export async function updateMessageStatus(messageId: string, status: string) {
 
 export async function updateConsultationStatus(consultationId: string, status: string) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     const { error } = await supabase
       .from("consultation_requests")

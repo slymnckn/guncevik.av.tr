@@ -6,7 +6,7 @@ import { invalidateAllCache } from "@/lib/redis-cache"
 export async function POST(request: NextRequest) {
   try {
     // Admin yetkisi kontrolü
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const {
       data: { session },
     } = await supabase.auth.getSession()

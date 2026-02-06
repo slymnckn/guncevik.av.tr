@@ -3,15 +3,14 @@ import { ArrowLeft } from "lucide-react"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { notFound } from "next/navigation"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { StatusUpdateForm, DeleteButton } from "./actions"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 export default async function ContactDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Mesajı getir
   const { data: contact, error } = await supabase.from("contact_submissions").select("*").eq("id", params.id).single()

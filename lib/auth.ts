@@ -5,23 +5,24 @@ import { redirect } from "next/navigation"
 
 // Admin kullanıcısını kontrol et
 export async function requireAuth() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (userError || !user) {
     redirect("/admin/login")
   }
 
   // Kullanıcının admin rolünü kontrol et
-  const { data: profile, error } = await supabase.from("admin_profiles").select("*").eq("id", session.user.id).single()
+  const { data: profile, error } = await supabase.from("admin_profiles").select("*").eq("id", user.id).single()
 
   if (error || !profile) {
     console.error("Admin profili bulunamadı:", error)
     redirect("/admin/login")
   }
 
-  return { user: session.user, profile }
+  return { user, profile }
 }

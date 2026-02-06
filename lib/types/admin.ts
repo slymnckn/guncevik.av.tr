@@ -1,6 +1,6 @@
 // Admin panel için tip tanımlamaları
 
-import type { User } from "@supabase/auth-helpers-nextjs"
+import type { User } from "@supabase/supabase-js"
 
 export type AdminRole = "admin" | "editor" | "viewer"
 

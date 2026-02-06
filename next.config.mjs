@@ -7,7 +7,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['pjjmouhsruudeniqcpuv.supabase.co'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -16,11 +15,6 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
-    unoptimized: true,
-  },
-  // Font optimizasyonu için doğru yapılandırma
-  experimental: {
-    // optimizeFonts kaldırıldı
   },
 };
 

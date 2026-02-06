@@ -1,11 +1,10 @@
 "use server"
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function getNotifications(limit = 20, offset = 0, isRead?: boolean) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kullanıcının oturum açıp açmadığını kontrol et
   const {
@@ -37,7 +36,7 @@ export async function getNotifications(limit = 20, offset = 0, isRead?: boolean)
 }
 
 export async function markNotificationAsRead(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kullanıcının oturum açıp açmadığını kontrol et
   const {
@@ -59,7 +58,7 @@ export async function markNotificationAsRead(id: string) {
 }
 
 export async function markAllNotificationsAsRead() {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kullanıcının oturum açıp açmadığını kontrol et
   const {
@@ -81,7 +80,7 @@ export async function markAllNotificationsAsRead() {
 }
 
 export async function createNotification(title: string, message: string, type: string, link?: string, userId?: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Kullanıcının admin olup olmadığını kontrol et
   const {

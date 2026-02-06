@@ -1,10 +1,14 @@
 import { Redis } from "@upstash/redis"
 
-// Redis istemcisi oluştur
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || "",
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
-})
+// Redis istemcisi oluştur (null-safe)
+let redis: Redis | null = null
+
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  })
+}
 
 // Önbellek anahtarı oluştur
 export function createCacheKey(prefix: string, params: Record<string, any> = {}): string {
@@ -27,37 +31,34 @@ export function createCacheKey(prefix: string, params: Record<string, any> = {})
 export async function getCachedData<T>(
   key: string,
   fetchFn: () => Promise<T>,
-  ttl = 3600, // Varsayılan TTL: 1 saat
+  ttl = 3600,
 ): Promise<T> {
+  if (!redis) {
+    return fetchFn()
+  }
+
   try {
-    // Önbellekten veriyi kontrol et
     const cachedData = await redis.get<T>(key)
 
     if (cachedData) {
-      console.log(`Cache hit for key: ${key}`)
       return cachedData
     }
 
-    // Veri önbellekte yoksa, fetch fonksiyonunu çalıştır
-    console.log(`Cache miss for key: ${key}, fetching data...`)
     const data = await fetchFn()
-
-    // Veriyi önbelleğe kaydet
     await redis.set(key, data, { ex: ttl })
 
     return data
   } catch (error) {
     console.error(`Cache error for key ${key}:`, error)
-    // Önbellekleme hatası durumunda, veriyi doğrudan getir
     return fetchFn()
   }
 }
 
 // Önbelleği temizle
 export async function invalidateCache(key: string): Promise<void> {
+  if (!redis) return
   try {
     await redis.del(key)
-    console.log(`Cache invalidated for key: ${key}`)
   } catch (error) {
     console.error(`Failed to invalidate cache for key ${key}:`, error)
   }
@@ -65,12 +66,12 @@ export async function invalidateCache(key: string): Promise<void> {
 
 // Önbellek anahtarı desenine göre temizle
 export async function invalidateCachePattern(pattern: string): Promise<void> {
+  if (!redis) return
   try {
     const keys = await redis.keys(pattern)
 
     if (keys.length > 0) {
-      await Promise.all(keys.map((key) => redis.del(key)))
-      console.log(`Invalidated ${keys.length} cache keys matching pattern: ${pattern}`)
+      await Promise.all(keys.map((key) => redis!.del(key)))
     }
   } catch (error) {
     console.error(`Failed to invalidate cache pattern ${pattern}:`, error)

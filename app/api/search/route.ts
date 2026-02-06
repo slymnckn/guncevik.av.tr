@@ -1,9 +1,12 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { withRateLimit } from "@/app/api/rate-limit"
-import { sanitizeHTML } from "@/lib/sanitize"
 import type { NextRequest } from "next/server"
+
+// PostgREST filter karakterlerini escape et
+function escapeFilterValue(value: string): string {
+  return value.replace(/[%_\\()*,."]/g, "")
+}
 
 export async function GET(req: NextRequest) {
   return withRateLimit(req, async () => {
@@ -19,9 +22,9 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Arama sorgusu gerekli" }, { status: 400 })
       }
 
-      const supabase = createServerComponentClient({ cookies })
-      const sanitizedQuery = sanitizeHTML(query)
-      const searchTerm = `%${sanitizedQuery.toLowerCase()}%`
+      const supabase = await createServerSupabaseClient()
+      const escapedQuery = escapeFilterValue(query.trim())
+      const searchTerm = `%${escapedQuery.toLowerCase()}%`
 
       let results = []
       let total = 0

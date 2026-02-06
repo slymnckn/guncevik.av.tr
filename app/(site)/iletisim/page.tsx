@@ -26,11 +26,11 @@ export default function ContactPage() {
                 Adres
               </h2>
               <p className="mt-2 text-gray-700 dark:text-gray-300">
-                Çınar, 5003/2 Sk. No:3 D:202 <br />
+                Çınar, 5003/2 Sk. No:3/5 D:202 <br />
                 Gümüş Plaza Optimus 35090 Bornova İzmir
               </p>
               <a
-                href="https://maps.google.com/?q=Çınar+5003/2+Sk.+No:3+D:202+Gümüş+Plaza+Optimus+35090+Bornova+İzmir"
+                href="https://maps.google.com/?q=Çınar+5003/2+Sk.+No:3/5+D:202+Gümüş+Plaza+Optimus+35090+Bornova+İzmir"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center mt-4 text-primary hover:underline"

@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { SiteWrapper } from "@/components/site-wrapper"
 import { BlogCard } from "@/components/blog-card"
 import { BlogSidebar } from "@/components/blog-sidebar"
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
 }
 
 export default async function BlogSearchPage({ searchParams }: SearchPageProps) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
   const searchQuery = searchParams.q || ""
 
   // Kategorileri getir

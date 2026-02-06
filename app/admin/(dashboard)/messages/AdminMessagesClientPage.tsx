@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/client"
 import { Loader2, RefreshCw, Eye, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { StatusBadge } from "@/lib/utils/status-helpers"
@@ -20,7 +20,7 @@ export default function AdminMessagesClientPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const fetchMessages = async () => {
     setLoading(true)

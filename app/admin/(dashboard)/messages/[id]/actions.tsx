@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation"
 import { Trash2, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/client"
 
 export function StatusUpdateForm({ messageId, currentStatus }: { messageId: string; currentStatus: string }) {
   const [status, setStatus] = useState(currentStatus)
   const [isUpdating, setIsUpdating] = useState(false)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const updateStatus = async () => {
     setIsUpdating(true)
@@ -55,7 +55,7 @@ export function StatusUpdateForm({ messageId, currentStatus }: { messageId: stri
 export function DeleteButton({ messageId }: { messageId: string }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const deleteMessage = async () => {
     if (!window.confirm("Bu mesajı silmek istediğinizden emin misiniz?")) {

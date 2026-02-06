@@ -7,7 +7,7 @@ import { slugify } from "@/lib/utils"
 
 // Hizmet oluşturma
 export async function createService(formData: FormData) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const title = formData.get("title") as string
   const slug = (formData.get("slug") as string) || slugify(title)
@@ -20,6 +20,8 @@ export async function createService(formData: FormData) {
   if (!title) {
     return { success: false, message: "Başlık alanı zorunludur." }
   }
+
+  let shouldRedirect = false
 
   try {
     const { data, error } = await supabase
@@ -44,7 +46,7 @@ export async function createService(formData: FormData) {
 
     revalidatePath("/admin/services")
     revalidatePath("/hizmetlerimiz")
-    redirect("/admin/services")
+    shouldRedirect = true
   } catch (error) {
     console.error("Hizmet oluşturma hatası:", error)
     return {
@@ -52,11 +54,15 @@ export async function createService(formData: FormData) {
       message: error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu",
     }
   }
+
+  if (shouldRedirect) {
+    redirect("/admin/services")
+  }
 }
 
 // Hizmet güncelleme
 export async function updateService(formData: FormData) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const id = formData.get("id") as string
   const title = formData.get("title") as string
@@ -71,8 +77,9 @@ export async function updateService(formData: FormData) {
     return { success: false, message: "ID ve başlık alanları zorunludur." }
   }
 
+  let shouldRedirect = false
+
   try {
-    // Önce mevcut hizmeti alalım (eski slug için)
     const { data: existingService } = await supabase.from("services").select("slug").eq("id", id).single()
 
     const { data, error } = await supabase
@@ -98,13 +105,12 @@ export async function updateService(formData: FormData) {
     revalidatePath("/admin/services")
     revalidatePath("/hizmetlerimiz")
 
-    // Eski ve yeni slug'ları revalidate et
     if (existingService?.slug) {
       revalidatePath(`/hizmetlerimiz/${existingService.slug}`)
     }
     revalidatePath(`/hizmetlerimiz/${slug}`)
 
-    redirect("/admin/services")
+    shouldRedirect = true
   } catch (error) {
     console.error("Hizmet güncelleme hatası:", error)
     return {
@@ -112,11 +118,15 @@ export async function updateService(formData: FormData) {
       message: error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu",
     }
   }
+
+  if (shouldRedirect) {
+    redirect("/admin/services")
+  }
 }
 
 // Hizmet silme
 export async function deleteService(formData: FormData) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const id = formData.get("id") as string
 
@@ -124,8 +134,9 @@ export async function deleteService(formData: FormData) {
     return { success: false, message: "ID alanı zorunludur." }
   }
 
+  let shouldRedirect = false
+
   try {
-    // Önce hizmetin slug'ını alalım (revalidatePath için)
     const { data: service, error: fetchError } = await supabase.from("services").select("slug").eq("id", id).single()
 
     if (fetchError) {
@@ -133,7 +144,6 @@ export async function deleteService(formData: FormData) {
       return { success: false, message: fetchError.message }
     }
 
-    // Hizmeti silelim
     const { error } = await supabase.from("services").delete().eq("id", id)
 
     if (error) {
@@ -146,7 +156,7 @@ export async function deleteService(formData: FormData) {
     if (service?.slug) {
       revalidatePath(`/hizmetlerimiz/${service.slug}`)
     }
-    redirect("/admin/services")
+    shouldRedirect = true
   } catch (error) {
     console.error("Hizmet silme hatası:", error)
     return {
@@ -154,11 +164,15 @@ export async function deleteService(formData: FormData) {
       message: error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu",
     }
   }
+
+  if (shouldRedirect) {
+    redirect("/admin/services")
+  }
 }
 
 // Hizmetleri getir
 export async function getServices() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { data, error } = await supabase.from("services").select("*").order("order_index", { ascending: true })
@@ -177,7 +191,7 @@ export async function getServices() {
 
 // Hizmet detayını getir
 export async function getServiceById(id: string) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { data, error } = await supabase.from("services").select("*").eq("id", id).single()
@@ -196,7 +210,7 @@ export async function getServiceById(id: string) {
 
 // Hizmet detayını slug ile getir
 export async function getServiceBySlug(slug: string) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   try {
     const { data, error } = await supabase.from("services").select("*").eq("slug", slug).single()

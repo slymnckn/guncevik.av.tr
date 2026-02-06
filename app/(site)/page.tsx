@@ -41,7 +41,7 @@ export default async function Home() {
         url={siteUrl}
         logo={`${siteUrl}/gc-law-logo.png`}
         address={{
-          streetAddress: "Çınar, 5003/2 Sk. No:3 D:202 Gümüş Plaza Optimus",
+          streetAddress: "Çınar, 5003/2 Sk. No:3/5 D:202 Gümüş Plaza Optimus",
           addressLocality: "Bornova",
           addressRegion: "İzmir",
           postalCode: "35090",

@@ -5,19 +5,13 @@ import type { ContactSubmission, AppointmentRequest, Activity } from "@/lib/type
 
 // Dashboard için gerekli verileri çeken fonksiyon
 export async function getDashboardData() {
-  const supabase = createServerSupabaseClient()
-
-  // İstatistikleri çek
-  const stats = await getDashboardStats()
-
-  // Son iletişim mesajlarını çek
-  const recentContacts = await getRecentContactSubmissions(5)
-
-  // Son randevuları çek
-  const recentAppointments = await getRecentAppointments(5)
-
-  // Son aktiviteleri çek
-  const recentActivities = await getRecentActivities(10)
+  // Tüm verileri paralel olarak çek
+  const [stats, recentContacts, recentAppointments, recentActivities] = await Promise.all([
+    getDashboardStats(),
+    getRecentContactSubmissions(5),
+    getRecentAppointments(5),
+    getRecentActivities(10),
+  ])
 
   return {
     stats,
@@ -29,53 +23,36 @@ export async function getDashboardData() {
 
 // Dashboard istatistiklerini çeken fonksiyon
 async function getDashboardStats() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
-  // Toplam iletişim mesajı sayısı
-  const { count: totalContacts } = await supabase
-    .from("contact_submissions")
-    .select("*", { count: "exact", head: true })
-
-  // Toplam randevu sayısı
-  const { count: totalAppointments } = await supabase.from("appointments").select("*", { count: "exact", head: true })
-
-  // Toplam blog yazısı sayısı
-  const { count: totalBlogPosts } = await supabase.from("blog_posts").select("*", { count: "exact", head: true })
-
-  // Toplam kullanıcı sayısı
-  const { count: totalUsers } = await supabase.from("admin_profiles").select("*", { count: "exact", head: true })
-
-  // Son 7 gündeki yeni iletişim mesajları
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
   const dateFilter = sevenDaysAgo.toISOString()
 
-  const { count: newContacts } = await supabase
-    .from("contact_submissions")
-    .select("*", { count: "exact", head: true })
-    .gt("created_at", dateFilter)
-
-  // Son 7 gündeki yeni randevular
-  const { count: newAppointments } = await supabase
-    .from("appointments")
-    .select("*", { count: "exact", head: true })
-    .gt("created_at", dateFilter)
-
-  // Son 30 gündeki yeni blog yazıları
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
   const monthDateFilter = thirtyDaysAgo.toISOString()
 
-  const { count: newBlogPosts } = await supabase
-    .from("blog_posts")
-    .select("*", { count: "exact", head: true })
-    .gt("created_at", monthDateFilter)
-
-  // Son 30 gündeki yeni kullanıcılar
-  const { count: newUsers } = await supabase
-    .from("admin_profiles")
-    .select("*", { count: "exact", head: true })
-    .gt("created_at", monthDateFilter)
+  // Tüm sorguları paralel olarak çalıştır
+  const [
+    { count: totalContacts },
+    { count: totalAppointments },
+    { count: totalBlogPosts },
+    { count: totalUsers },
+    { count: newContacts },
+    { count: newAppointments },
+    { count: newBlogPosts },
+    { count: newUsers },
+  ] = await Promise.all([
+    supabase.from("contact_submissions").select("*", { count: "exact", head: true }),
+    supabase.from("appointments").select("*", { count: "exact", head: true }),
+    supabase.from("blog_posts").select("*", { count: "exact", head: true }),
+    supabase.from("admin_profiles").select("*", { count: "exact", head: true }),
+    supabase.from("contact_submissions").select("*", { count: "exact", head: true }).gt("created_at", dateFilter),
+    supabase.from("appointments").select("*", { count: "exact", head: true }).gt("created_at", dateFilter),
+    supabase.from("blog_posts").select("*", { count: "exact", head: true }).gt("created_at", monthDateFilter),
+    supabase.from("admin_profiles").select("*", { count: "exact", head: true }).gt("created_at", monthDateFilter),
+  ])
 
   return {
     totalContacts: totalContacts || 0,
@@ -91,7 +68,7 @@ async function getDashboardStats() {
 
 // Son iletişim mesajlarını çeken fonksiyon
 async function getRecentContactSubmissions(limit = 5): Promise<ContactSubmission[]> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data, error } = await supabase
     .from("contact_submissions")
@@ -109,7 +86,7 @@ async function getRecentContactSubmissions(limit = 5): Promise<ContactSubmission
 
 // Son randevuları çeken fonksiyon
 async function getRecentAppointments(limit = 5): Promise<AppointmentRequest[]> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data, error } = await supabase
     .from("appointments")
@@ -127,7 +104,7 @@ async function getRecentAppointments(limit = 5): Promise<AppointmentRequest[]> {
 
 // Son aktiviteleri çeken fonksiyon
 async function getRecentActivities(limit = 10): Promise<Activity[]> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const activities: Activity[] = []
 
   // Son iletişim mesajlarını çek

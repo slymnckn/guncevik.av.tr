@@ -22,7 +22,7 @@ export async function sendContactForm(formData: FormData) {
     }
 
     // Initialize Supabase client
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     // Insert data into contact_submissions table
     const { error, data } = await supabase
@@ -86,7 +86,7 @@ export async function sendContactForm(formData: FormData) {
 
 export async function updateMessageStatus(id: string, status: string) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     const { error } = await supabase
       .from("contact_submissions")
@@ -122,7 +122,7 @@ export async function updateMessageStatus(id: string, status: string) {
 
 export async function deleteMessage(id: string) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     // First delete related notifications
     try {

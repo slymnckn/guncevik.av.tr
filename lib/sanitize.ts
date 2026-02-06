@@ -1,4 +1,4 @@
-import DOMPurify from "dompurify"
+import DOMPurify from "isomorphic-dompurify"
 
 // HTML içeriğini temizle
 export function sanitizeHTML(html: string): string {

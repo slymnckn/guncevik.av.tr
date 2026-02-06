@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { PopularTags } from "@/components/popular-tags"
 
 export async function BlogSidebar() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Kategorileri getir
   const { data: categories } = await supabase

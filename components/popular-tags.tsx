@@ -2,7 +2,7 @@ import Link from "next/link"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function PopularTags() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Popüler etiketleri getir - blog_post_tags tablosundan sayım yaparak
   const { data } = await supabase

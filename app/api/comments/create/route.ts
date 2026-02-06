@@ -12,7 +12,7 @@ const commentSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const body = await request.json()
 
     // Validate input

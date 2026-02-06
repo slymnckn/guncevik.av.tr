@@ -69,7 +69,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = params
 
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     // Parallelize data fetching
     const [post, categoriesData, popularPostsData] = await Promise.all([

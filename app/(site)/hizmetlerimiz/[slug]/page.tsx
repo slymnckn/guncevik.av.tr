@@ -11,7 +11,7 @@ interface ServicePageProps {
 }
 
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { data: service } = await supabase.from("services").select("*").eq("slug", params.slug).single()
 
   if (!service) {
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 }
 
 export default async function ServicePage({ params }: ServicePageProps) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
   const { data: service, error } = await supabase.from("services").select("*").eq("slug", params.slug).single()
 
   if (error || !service) {

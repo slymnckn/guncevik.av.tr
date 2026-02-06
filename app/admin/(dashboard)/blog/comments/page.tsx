@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle, Eye } from "lucide-react"
@@ -9,7 +8,7 @@ import { tr } from "date-fns/locale"
 export const dynamic = "force-dynamic"
 
 export default async function CommentsPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   const { data: comments, error } = await supabase
     .from("blog_comments")

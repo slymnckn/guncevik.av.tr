@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import Image from "next/image"
 import { FileText, Briefcase, HelpCircle } from "lucide-react"
@@ -14,7 +13,7 @@ interface SearchResultsProps {
 }
 
 export async function SearchResults({ query, type = "all", page = 1 }: SearchResultsProps) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
   const limit = 10
 
   // API'den arama sonuçlarını getir

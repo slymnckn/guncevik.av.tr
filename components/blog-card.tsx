@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { BlogTags } from "@/components/blog-tags"
 
 interface BlogCardProps {
@@ -9,7 +8,7 @@ interface BlogCardProps {
 }
 
 export async function BlogCard({ post }: BlogCardProps) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Görsel URL'sini oluştur
   let imageUrl = null

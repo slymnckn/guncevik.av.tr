@@ -22,7 +22,7 @@ export function createAdminSupabaseClient() {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   // Get total counts
   const { count: totalContacts } = await supabase
@@ -48,7 +48,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 }
 
 export async function getRecentContactSubmissions(limit = 5): Promise<ContactSubmission[]> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data, error } = await supabase
     .from("contact_submissions")
@@ -65,7 +65,7 @@ export async function getRecentContactSubmissions(limit = 5): Promise<ContactSub
 }
 
 export async function getContactSubmissionById(id: string): Promise<ContactSubmission | null> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data, error } = await supabase.from("contact_submissions").select("*").eq("id", id).single()
 

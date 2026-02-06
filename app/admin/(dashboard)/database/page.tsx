@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
@@ -10,7 +10,7 @@ import { Database, RefreshCw, AlertTriangle, CheckCircle } from "lucide-react"
 export default function DatabasePage() {
   const [loading, setLoading] = useState(false)
   const [lastBackup, setLastBackup] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const handleBackup = async () => {
     try {

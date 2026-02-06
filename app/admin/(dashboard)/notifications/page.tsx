@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import Link from "next/link"
@@ -11,7 +10,7 @@ import { Button } from "@/components/ui/button"
 export const dynamic = "force-dynamic"
 
 export default async function NotificationsPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerSupabaseClient()
 
   // Fetch notifications
   const { data: notifications, error } = await supabase
@@ -27,7 +26,7 @@ export default async function NotificationsPage() {
   // Mark all as read
   const markAllAsRead = async () => {
     "use server"
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = await createServerSupabaseClient()
     await supabase.from("notifications").update({ is_read: true }).eq("is_read", false)
   }
 
