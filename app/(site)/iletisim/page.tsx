@@ -102,7 +102,7 @@ export default function ContactPage() {
               <h2 className="text-2xl font-semibold mb-6">Konum</h2>
               <div className="h-[400px] w-full rounded-lg overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3125.5!2d27.22!3d38.46!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDI3JzM2LjAiTiAyN8KwMTMnMTIuMCJF!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5171.763917928795!2d27.17849377716699!3d38.44074767351721!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b963e58237a615%3A0x926910e1ca722fc4!2zR8O8bcO8xZ8gUGxhemEgT3B0aW11cw!5e1!3m2!1str!2str!4v1770397002995!5m2!1str!2str"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
