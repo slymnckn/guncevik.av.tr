@@ -5,36 +5,27 @@ import { TrendingUp, Clock } from "lucide-react"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 export async function BlogList() {
-  const supabase = await createServerSupabaseClient()
+  try {
+    const supabase = await createServerSupabaseClient()
 
-  console.log("Fetching blog posts for blog list")
+    // Blog yazılarını getir
+    const { data: posts, error } = await supabase
+      .from("blog_posts")
+      .select("*, blog_categories(*)")
+      .eq("published", true)
+      .order("published_at", { ascending: false })
+      .limit(10)
 
-  // Blog yazılarını getir
-  const { data: posts, error } = await supabase
-    .from("blog_posts")
-    .select("*, blog_categories(*)")
-    .eq("published", true)
-    .order("published_at", { ascending: false })
-    .limit(10)
+    if (error) {
+      console.error("Error fetching blog posts:", error.message, error.details, error.hint)
+      return (
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <p className="text-gray-500">Blog yazıları yüklenirken bir hata oluştu.</p>
+        </div>
+      )
+    }
 
-  if (error) {
-    console.error("Error fetching blog posts:", error)
-    return (
-      <div className="text-center py-12 bg-white rounded-lg shadow">
-        <p className="text-gray-500">Blog yazıları yüklenirken bir hata oluştu.</p>
-      </div>
-    )
-  }
-
-  console.log(`Found ${posts?.length || 0} blog posts`)
-
-  if (posts) {
-    posts.forEach((post) => {
-      console.log(`Post: ${post.title}, Slug: ${post.slug}, URL: /makaleler/${post.slug}`)
-    })
-  }
-
-  if (!posts || posts.length === 0) {
+    if (!posts || posts.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow">
         <p className="text-gray-500">Henüz makale bulunmamaktadır.</p>
@@ -174,5 +165,13 @@ export async function BlogList() {
         </div>
       )}
     </>
-  )
+    )
+  } catch (err) {
+    console.error("BlogList component error:", err)
+    return (
+      <div className="text-center py-12 bg-white rounded-lg shadow">
+        <p className="text-gray-500">Blog yazıları yüklenirken bir hata oluştu.</p>
+      </div>
+    )
+  }
 }

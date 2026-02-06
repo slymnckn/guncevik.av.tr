@@ -15,23 +15,16 @@ export async function createServerSupabaseClient() {
 
   return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
-      get(name) {
-        return cookieStore.get(name)?.value
+      getAll() {
+        return cookieStore.getAll()
       },
-      set(name, value, options) {
+      setAll(cookiesToSet) {
         try {
-          cookieStore.set({ name, value, ...options })
-        } catch (error) {
-          // Çerezleri ayarlarken hata oluşursa, sessiz bir şekilde devam et
-          console.error("Error setting cookie:", error)
-        }
-      },
-      remove(name, options) {
-        try {
-          cookieStore.set({ name, value: "", ...options })
-        } catch (error) {
-          // Çerezleri kaldırırken hata oluşursa, sessiz bir şekilde devam et
-          console.error("Error removing cookie:", error)
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        } catch {
+          // Server Component'ten çağrıldığında set edilemez, middleware halleder
         }
       },
     },
