@@ -168,9 +168,9 @@ export function Footer() {
               <Image
                 src="/broos-tech.png"
                 alt="Broos Tech"
-                width={80}
-                height={24}
-                className="h-5 w-auto"
+                width={120}
+                height={36}
+                className="h-8 w-auto"
               />
             </a>
           </div>
